@@ -34,6 +34,7 @@ function titleCase(value) { return value ? value.charAt(0).toUpperCase() + value
 function weekday(date, format = "long") { return titleCase(new Intl.DateTimeFormat(locale, { weekday: format }).format(date)); }
 function formatDate(date, options) { return new Intl.DateTimeFormat(locale, options).format(date); }
 function cleanTime(value) { return (value || "").slice(0, 5); }
+function normalizeActivityName(value) { return String(value || "").trim().toLocaleLowerCase(locale); }
 function isHoliday(date) { return holidays.has(toISODate(date)); }
 function isAfterCalendarEnd(date) { return localDate(date) > calendarEnd; }
 function sortActivities(a, b) { return `${a.date}${cleanTime(a.start_time)}${a.name}`.localeCompare(`${b.date}${cleanTime(b.start_time)}${b.name}`, locale); }
@@ -311,7 +312,8 @@ function isSafeUrl(value) { if (!value) return false; try { return ["https:", "h
 
 function openActivityForm(item = null) {
   if (!state.canEdit) return; if (detailDialog.open) detailDialog.close();
-  el("activityForm").reset(); el("formError").hidden = true; el("activityId").value = item?.id || ""; el("formTitle").textContent = item ? "Editar actividad" : "Nueva actividad";
+  el("activityForm").reset(); el("formError").hidden = true; el("activityId").value = item?.id || ""; el("originalActivityName").value = item?.name || ""; el("formTitle").textContent = item ? "Editar actividad" : "Nueva actividad";
+  el("bulkEditField").hidden = !item?.id; el("updateSameName").checked = false;
   const { start, end } = periodRange(); const today = localDate(new Date()); const defaultDate = today >= start && today <= end ? today : start;
   el("date").value = item?.date || toISODate(defaultDate); el("endDate").value = item?.end_date || item?.date || toISODate(defaultDate);
   el("startTime").value = cleanTime(item?.start_time) || "09:00"; el("endTime").value = cleanTime(item?.end_time) || "10:00";
@@ -367,18 +369,45 @@ async function saveActivity(event) {
   if (validationError) { errorBox.textContent = validationError; errorBox.hidden = false; return; }
   const button = el("saveActivity"); button.disabled = true; button.textContent = "Guardando…";
   try {
+    let successMessage = id ? "Actividad actualizada" : "Actividad guardada";
     if (configured) {
-      if (id) await updateDoc(doc(db, activitiesCollection, id), { ...payload, updated_at: serverTimestamp() });
+      if (id && el("updateSameName").checked) {
+        const updated = await updateActivitiesWithSameName(id, el("originalActivityName").value, payload);
+        successMessage = `${updated} ${updated === 1 ? "actividad actualizada" : "actividades actualizadas"}`;
+      } else if (id) await updateDoc(doc(db, activitiesCollection, id), { ...payload, updated_at: serverTimestamp() });
       else await writeNewActivities(recurrenceRecords(payload));
     } else {
       const records = loadDemoData(); const index = records.findIndex((item) => item.id === id);
-      if (index >= 0) records[index] = { ...records[index], ...payload };
+      if (index >= 0 && el("updateSameName").checked) {
+        const originalName = normalizeActivityName(el("originalActivityName").value); const { date, end_date, ...sharedPayload } = payload; let updated = 0;
+        records.forEach((record, recordIndex) => {
+          if (normalizeActivityName(record.name) !== originalName) return;
+          records[recordIndex] = record.id === id ? { ...record, ...payload } : { ...record, ...sharedPayload }; updated += 1;
+        });
+        successMessage = `${updated} ${updated === 1 ? "actividad actualizada" : "actividades actualizadas"}`;
+      } else if (index >= 0) records[index] = { ...records[index], ...payload };
       else recurrenceRecords(payload).forEach((record) => records.push({ ...record, id: crypto.randomUUID() }));
       writeDemoData(records);
     }
-    activityDialog.close(); state.cursor = fromISODate(payload.date); await loadPeriod(); showToast(id ? "Actividad actualizada" : "Actividad guardada");
+    activityDialog.close(); state.cursor = fromISODate(payload.date); await loadPeriod(); showToast(successMessage);
   } catch (error) { errorBox.textContent = `No se pudo guardar. ${friendlyError(error)}`; errorBox.hidden = false; }
   finally { button.disabled = false; button.textContent = "Guardar actividad"; }
+}
+
+async function updateActivitiesWithSameName(currentId, originalName, payload) {
+  const normalizedName = normalizeActivityName(originalName); const snapshot = await getDocs(collection(db, activitiesCollection));
+  const matching = snapshot.docs.filter((record) => normalizeActivityName(record.data().name) === normalizedName);
+  const targets = matching.some((record) => record.id === currentId) ? matching : [...matching, { id: currentId, ref: doc(db, activitiesCollection, currentId) }];
+  const { date, end_date, ...sharedPayload } = payload;
+  for (let start = 0; start < targets.length; start += 450) {
+    const batch = writeBatch(db);
+    targets.slice(start, start + 450).forEach((record) => {
+      const changes = record.id === currentId ? payload : sharedPayload;
+      batch.update(record.ref, { ...changes, updated_at: serverTimestamp() });
+    });
+    await batch.commit();
+  }
+  return targets.length;
 }
 
 async function writeNewActivities(records) {

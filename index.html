@@ -64,6 +64,7 @@
           <button class="close-button" type="button" data-close="activityDialog" aria-label="Cerrar">×</button>
         </div>
         <input id="activityId" type="hidden" />
+        <input id="originalActivityName" type="hidden" />
         <div class="form-grid">
           <label>Fecha de inicio<input id="date" type="date" max="2026-12-28" required /></label>
           <label>Fecha de finalización<input id="endDate" type="date" max="2026-12-28" required /></label>
@@ -88,6 +89,7 @@
           <label class="wide">Enlace de la actividad<input id="meetingUrl" type="url" maxlength="500" placeholder="https://…" /></label>
           <label class="wide">Requerimientos / observaciones<textarea id="requirements" rows="4" maxlength="1000" placeholder="Micrófonos, cámara, presentación, indicaciones especiales…"></textarea></label>
           <label class="recording-field"><input id="recordingRequired" type="checkbox" /><span><strong>Requiere grabación</strong><small>Marcar si la actividad debe registrarse.</small></span></label>
+          <label id="bulkEditField" class="recording-field wide" hidden><input id="updateSameName" type="checkbox" /><span><strong>Aplicar estos cambios a todas las actividades con el mismo nombre</strong><small>Se conservarán las fechas propias de cada actividad.</small></span></label>
         </div>
         <div id="formError" class="form-error" role="alert" hidden></div>
         <div class="dialog-actions">

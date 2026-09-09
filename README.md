@@ -23,6 +23,7 @@ El proyecto ya contiene la configuración del proyecto Firebase `agenda-hibridac
 - Tarjetas compactas con día, horario, actividad y aula; el resto se despliega.
 - Botones para abrir o copiar el enlace.
 - Carga manual, edición, duplicación y eliminación.
+- Edición individual o conjunta de todas las actividades que tengan el mismo nombre.
 - Rango de fechas para actividades que duran varios días; se muestran cada día del período, excepto los domingos.
 - Actividades únicas, semanales o cada 15 días.
 - Importación inicial desde Google Calendar mediante `.ics`.
@@ -84,6 +85,8 @@ No se edita ningún archivo para el uso cotidiano.
 3. Elegir **Editar**, **Duplicar** o **Eliminar**.
 
 Al duplicar, la copia se prepara automáticamente para la semana siguiente. Se puede modificar la fecha antes de guardarla.
+
+Al editar, se puede marcar **Aplicar estos cambios a todas las actividades con el mismo nombre**. Esta opción actualiza el nombre, horario, Secretaría, responsable, aula, plataforma, cuenta, enlace, grabación y observaciones de todas las coincidencias, pero conserva las fechas propias de cada actividad.
 
 ## Importación inicial desde Google Calendar
 
