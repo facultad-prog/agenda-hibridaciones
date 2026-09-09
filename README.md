@@ -27,6 +27,7 @@ El proyecto ya contiene la configuración del proyecto Firebase `agenda-hibridac
 - Rango de fechas para actividades que duran varios días; se muestran cada día del período, excepto los domingos.
 - Actividades únicas, semanales o cada 15 días.
 - Importación inicial desde Google Calendar mediante `.ics`.
+- Limpieza segura de actividades importadas anteriores al 9 de septiembre de 2026, sin afectar las futuras ni las cargas manuales.
 - Campo de grabación.
 - Tipografía Montserrat, color `#014a7d` y logo institucional.
 
@@ -89,6 +90,8 @@ Al duplicar, la copia se prepara automáticamente para la semana siguiente. Se p
 Al editar, se puede marcar **Aplicar estos cambios a todas las actividades con el mismo nombre**. Esta opción actualiza el nombre, horario, Secretaría, responsable, aula, plataforma, cuenta, enlace, grabación y observaciones de todas las coincidencias, pero conserva las fechas propias de cada actividad.
 
 ## Importación inicial desde Google Calendar
+
+La importación inicial ya fue realizada. En la versión publicada, el botón de importación queda oculto para evitar cargas duplicadas.
 
 ### Exportar el calendario
 

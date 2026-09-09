@@ -66,6 +66,7 @@ function writeDemoData(records) { localStorage.setItem(demoStorageKey, JSON.stri
 
 async function init() {
   el("demoBanner").hidden = configured;
+  el("cleanupPastImports").hidden = !configured;
   bindEvents();
   if (configured) {
     await setPersistence(auth, browserLocalPersistence).catch(() => {});
@@ -89,6 +90,7 @@ function bindEvents() {
   el("currentPeriod").addEventListener("click", () => { state.cursor = new Date(); loadPeriod(); });
   el("newActivity").addEventListener("click", () => openActivityForm());
   el("importCalendar").addEventListener("click", openImportForm);
+  el("cleanupPastImports").addEventListener("click", cleanupPastImportedActivities);
   el("authButton").addEventListener("click", handleAuthButton);
   el("activityForm").addEventListener("submit", saveActivity);
   el("importForm").addEventListener("submit", importCalendarFile);
@@ -428,6 +430,32 @@ async function deleteActivity(item) {
     if (configured) await deleteDoc(doc(db, activitiesCollection, item.id)); else writeDemoData(loadDemoData().filter((record) => record.id !== item.id));
     if (detailDialog.open) detailDialog.close(); await loadPeriod(); showToast("Actividad eliminada");
   } catch (error) { alert(`No se pudo eliminar. ${friendlyError(error)}`); }
+}
+
+async function cleanupPastImportedActivities() {
+  if (!state.canEdit) return;
+  const cutoff = "2026-09-09"; const button = el("cleanupPastImports");
+  try {
+    button.disabled = true; button.textContent = "Revisando…";
+    const snapshot = await getDocs(collection(db, activitiesCollection));
+    const targets = snapshot.docs.filter((record) => {
+      const data = record.data();
+      return String(data.source_uid || "").startsWith("agenda-hibridaciones-2026-") && data.date < cutoff;
+    });
+    if (!targets.length) { showToast("No hay actividades importadas anteriores"); return; }
+    if (!confirm(`Se eliminarán ${targets.length} actividades importadas anteriores al 9 de septiembre de 2026. Las actividades futuras y las cargas manuales se conservarán. ¿Continuar?`)) return;
+    button.textContent = "Eliminando…";
+    for (let start = 0; start < targets.length; start += 450) {
+      const batch = writeBatch(db);
+      targets.slice(start, start + 450).forEach((record) => batch.delete(record.ref));
+      await batch.commit();
+    }
+    await loadPeriod(); showToast(`${targets.length} actividades anteriores eliminadas`);
+  } catch (error) {
+    alert(`No se pudo completar la limpieza. ${friendlyError(error)}`);
+  } finally {
+    button.disabled = false; button.textContent = "Eliminar actividades anteriores";
+  }
 }
 
 function openImportForm() { if (!state.canEdit) return; el("importForm").reset(); el("icsFileName").textContent = "Ningún archivo seleccionado"; el("importMessage").hidden = true; importDialog.showModal(); }
