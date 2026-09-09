@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#014a7d" />
+    <meta name="description" content="Agenda de actividades híbridas de la Facultad de Derecho." />
+    <title>Agenda de Hibridaciones | Facultad de Derecho</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="header-inner">
+        <div class="brand">
+          <img src="assets/logo-fd-blanco.png" alt="Facultad de Derecho, Universidad Nacional de Cuyo" />
+          <span class="brand-divider" aria-hidden="true"></span>
+          <h1>Agenda de<br />Hibridaciones</h1>
+        </div>
+        <div class="session-area">
+          <span id="sessionLabel" class="session-label">Consulta pública</span>
+          <button id="authButton" class="button button-header" type="button">Acceso del equipo</button>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <section id="demoBanner" class="demo-banner" hidden>
+        <strong>Modo de prueba.</strong> Los cambios se guardan sólo en este dispositivo.
+      </section>
+
+      <section class="agenda-toolbar" aria-label="Controles de agenda">
+        <div class="period-heading">
+          <p id="viewEyebrow" class="eyebrow">Vista semanal</p>
+          <h2 id="periodTitle">Semana actual</h2>
+        </div>
+        <div class="toolbar-right">
+          <div class="view-switch" role="group" aria-label="Tipo de vista">
+            <button id="weekView" class="view-button active" type="button" aria-pressed="true">Semana</button>
+            <button id="monthView" class="view-button" type="button" aria-pressed="false">Mes</button>
+          </div>
+          <div class="period-actions">
+            <button id="previousPeriod" class="icon-button" type="button" aria-label="Período anterior">←</button>
+            <button id="currentPeriod" class="button button-secondary" type="button">Hoy</button>
+            <button id="nextPeriod" class="icon-button" type="button" aria-label="Período siguiente">→</button>
+          </div>
+          <div class="editor-actions editor-only" hidden>
+            <button id="importCalendar" class="button button-secondary" type="button">Importar calendario</button>
+            <button id="newActivity" class="button button-primary" type="button">+ Cargar actividad</button>
+          </div>
+        </div>
+      </section>
+
+      <div id="status" class="status" role="status" aria-live="polite">Cargando agenda…</div>
+      <section id="agenda" class="agenda" aria-label="Actividades"></section>
+    </main>
+
+    <dialog id="activityDialog" class="dialog activity-dialog">
+      <form id="activityForm">
+        <div class="dialog-header">
+          <div><p class="eyebrow">Carga manual</p><h2 id="formTitle">Nueva actividad</h2></div>
+          <button class="close-button" type="button" data-close="activityDialog" aria-label="Cerrar">×</button>
+        </div>
+        <input id="activityId" type="hidden" />
+        <div class="form-grid">
+          <label>Fecha<input id="date" type="date" max="2026-12-28" required /></label>
+          <label>Día<input id="weekdayDisplay" type="text" readonly /></label>
+          <label>Hora de inicio<input id="startTime" type="time" required /></label>
+          <label>Hora de finalización<input id="endTime" type="time" required /></label>
+          <label>Repetición
+            <select id="recurrence">
+              <option value="none">No se repite</option>
+              <option value="weekly">Todas las semanas</option>
+              <option value="biweekly">Cada 15 días</option>
+            </select>
+          </label>
+          <label id="repeatUntilField" hidden>Repetir hasta<input id="repeatUntil" type="date" max="2026-12-28" /></label>
+          <label class="wide">Nombre de la actividad<input id="name" type="text" maxlength="160" required /></label>
+          <label>Secretaría que organiza<input id="secretary" type="text" maxlength="120" required /></label>
+          <label>Responsable<input id="responsible" type="text" maxlength="100" required /></label>
+          <label>Aula / lugar<input id="classroom" type="text" maxlength="100" required /></label>
+          <label>Plataforma<input id="platform" type="text" list="platformOptions" maxlength="80" placeholder="Zoom, Google Meet…" /></label>
+          <datalist id="platformOptions"><option value="Zoom"></option><option value="Google Meet"></option><option value="Microsoft Teams"></option><option value="YouTube"></option></datalist>
+          <label class="wide">Cuenta utilizada<input id="accountUsed" type="text" maxlength="160" /></label>
+          <label class="wide">Enlace de la actividad<input id="meetingUrl" type="url" maxlength="500" placeholder="https://…" /></label>
+          <label class="wide">Requerimientos / observaciones<textarea id="requirements" rows="4" maxlength="1000" placeholder="Micrófonos, cámara, presentación, indicaciones especiales…"></textarea></label>
+          <label class="recording-field"><input id="recordingRequired" type="checkbox" /><span><strong>Requiere grabación</strong><small>Marcar si la actividad debe registrarse.</small></span></label>
+        </div>
+        <div id="formError" class="form-error" role="alert" hidden></div>
+        <div class="dialog-actions">
+          <button class="button button-secondary" type="button" data-close="activityDialog">Cancelar</button>
+          <button id="saveActivity" class="button button-primary" type="submit">Guardar actividad</button>
+        </div>
+      </form>
+    </dialog>
+
+    <dialog id="importDialog" class="dialog import-dialog">
+      <form id="importForm">
+        <div class="dialog-header">
+          <div><p class="eyebrow">Carga desde Google Calendar</p><h2>Importar calendario</h2></div>
+          <button class="close-button" type="button" data-close="importDialog" aria-label="Cerrar">×</button>
+        </div>
+        <p class="dialog-intro">Exportá o descargá el calendario desde Google Calendar y seleccioná aquí el archivo <strong>.ics</strong>.</p>
+        <label class="file-field">Archivo del calendario<input id="icsFile" type="file" accept=".ics,text/calendar" required /><span>Seleccionar archivo .ics</span><small id="icsFileName">Ningún archivo seleccionado</small></label>
+        <fieldset>
+          <legend>Datos comunes para los eventos importados</legend>
+          <div class="form-grid">
+            <label>Secretaría que organiza<input id="importSecretary" type="text" maxlength="120" required /></label>
+            <label>Responsable<input id="importResponsible" type="text" maxlength="100" required /></label>
+            <label>Plataforma<input id="importPlatform" type="text" list="platformOptions" maxlength="80" /></label>
+            <label>Cuenta utilizada<input id="importAccount" type="text" maxlength="160" /></label>
+            <label class="wide">Requerimientos / observaciones adicionales<textarea id="importRequirements" rows="3" maxlength="600"></textarea></label>
+            <label class="recording-field"><input id="importRecording" type="checkbox" /><span><strong>Requieren grabación</strong><small>Se aplicará a todos los eventos del archivo.</small></span></label>
+          </div>
+        </fieldset>
+        <div id="importMessage" class="form-error" role="alert" hidden></div>
+        <div class="dialog-actions">
+          <button class="button button-secondary" type="button" data-close="importDialog">Cancelar</button>
+          <button id="runImport" class="button button-primary" type="submit">Importar actividades</button>
+        </div>
+      </form>
+    </dialog>
+
+    <dialog id="detailDialog" class="dialog detail-dialog">
+      <div class="detail-dialog-content">
+        <div class="dialog-header">
+          <div><p id="detailDate" class="eyebrow"></p><h2 id="detailTitle"></h2></div>
+          <button class="close-button" type="button" data-close="detailDialog" aria-label="Cerrar">×</button>
+        </div>
+        <div id="detailBody"></div>
+      </div>
+    </dialog>
+
+    <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+
+    <script src="config.js"></script>
+    <script type="module" src="app.js"></script>
+  </body>
+</html>
