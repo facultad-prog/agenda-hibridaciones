@@ -1,6 +1,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
 import { browserLocalPersistence, getAuth, GoogleAuthProvider, onAuthStateChanged, setPersistence, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-auth.js";
-import { addDoc, collection, deleteDoc, doc, getDocs, getFirestore, query, serverTimestamp, updateDoc, where, writeBatch } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js";
+import { addDoc, collection, deleteDoc, doc, getDocs, getFirestore, serverTimestamp, updateDoc, writeBatch } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js";
 
 const config = window.AGENDA_CONFIG || {};
 const demoMode = new URLSearchParams(location.search).has("demo");
@@ -37,13 +37,20 @@ function cleanTime(value) { return (value || "").slice(0, 5); }
 function isHoliday(date) { return holidays.has(toISODate(date)); }
 function isAfterCalendarEnd(date) { return localDate(date) > calendarEnd; }
 function sortActivities(a, b) { return `${a.date}${cleanTime(a.start_time)}${a.name}`.localeCompare(`${b.date}${cleanTime(b.start_time)}${b.name}`, locale); }
+function activityEndDate(item) { return item.end_date || item.date; }
+function overlapsPeriod(item, start, end) { return item.date <= toISODate(end) && activityEndDate(item) >= toISODate(start); }
+function dateRangeLabel(item) {
+  const start = fromISODate(item.date); const end = fromISODate(activityEndDate(item));
+  if (item.date === activityEndDate(item)) return `${weekday(start)} ${formatDate(start, { day: "numeric", month: "long" })}`;
+  return `${formatDate(start, { day: "numeric", month: "long" })} al ${formatDate(end, { day: "numeric", month: "long", year: "numeric" })}`;
+}
 
 function demoRecords() {
   const monday = startOfWeek(new Date());
   return [
-    { id: "demo-1", date: toISODate(monday), start_time: "09:00", end_time: "11:00", name: "Jornada de actualización en Derecho Procesal", secretary: "Secretaría de Posgrado", responsible: "Mariana López", classroom: "Aula Magna", requirements: "Dos micrófonos, cámara fija y presentación. Realizar prueba técnica 30 minutos antes.", meeting_url: "https://meet.google.com/", platform: "Google Meet", account_used: "Cuenta institucional Posgrado", recording_required: true, observations: "" },
-    { id: "demo-2", date: toISODate(addDays(monday, 1)), start_time: "16:00", end_time: "18:00", name: "Defensa de trabajo final", secretary: "Secretaría Académica", responsible: "Lucas Fernández", classroom: "Sala de Posgrado 2", requirements: "Notebook, proyector y audio bidireccional.", meeting_url: "https://zoom.us/", platform: "Zoom", account_used: "Licencia Zoom Facultad", recording_required: true, observations: "" },
-    { id: "demo-3", date: toISODate(addDays(monday, 3)), start_time: "10:30", end_time: "12:00", name: "Reunión de coordinación académica", secretary: "Educación a Distancia", responsible: "Sofía Martínez", classroom: "Sala de Consejo", requirements: "Pantalla y cámara móvil. Participan autoridades de dos sedes.", meeting_url: "https://teams.microsoft.com/", platform: "Microsoft Teams", account_used: "Secretaría Académica", recording_required: false, observations: "" }
+    { id: "demo-1", date: toISODate(monday), end_date: toISODate(addDays(monday, 1)), start_time: "09:00", end_time: "11:00", name: "Jornada de actualización en Derecho Procesal", secretary: "Secretaría de Posgrado", responsible: "Mariana López", classroom: "Aula Magna", requirements: "Dos micrófonos, cámara fija y presentación. Realizar prueba técnica 30 minutos antes.", meeting_url: "https://meet.google.com/", platform: "Google Meet", account_used: "Cuenta institucional Posgrado", recording_required: true, observations: "" },
+    { id: "demo-2", date: toISODate(addDays(monday, 1)), end_date: toISODate(addDays(monday, 1)), start_time: "16:00", end_time: "18:00", name: "Defensa de trabajo final", secretary: "Secretaría Académica", responsible: "Lucas Fernández", classroom: "Sala de Posgrado 2", requirements: "Notebook, proyector y audio bidireccional.", meeting_url: "https://zoom.us/", platform: "Zoom", account_used: "Licencia Zoom Facultad", recording_required: true, observations: "" },
+    { id: "demo-3", date: toISODate(addDays(monday, 3)), end_date: toISODate(addDays(monday, 3)), start_time: "10:30", end_time: "12:00", name: "Reunión de coordinación académica", secretary: "Educación a Distancia", responsible: "Sofía Martínez", classroom: "Sala de Consejo", requirements: "Pantalla y cámara móvil. Participan autoridades de dos sedes.", meeting_url: "https://teams.microsoft.com/", platform: "Microsoft Teams", account_used: "Secretaría Académica", recording_required: false, observations: "" }
   ].filter((item) => fromISODate(item.date) <= calendarEnd);
 }
 
@@ -85,6 +92,7 @@ function bindEvents() {
   el("activityForm").addEventListener("submit", saveActivity);
   el("importForm").addEventListener("submit", importCalendarFile);
   el("date").addEventListener("change", updateWeekdayInput);
+  el("endDate").addEventListener("change", updateDateRangeInputs);
   el("recurrence").addEventListener("change", toggleRecurrenceFields);
   el("icsFile").addEventListener("change", () => { el("icsFileName").textContent = el("icsFile").files[0]?.name || "Ningún archivo seleccionado"; });
   document.querySelectorAll("[data-close]").forEach((button) => button.addEventListener("click", () => el(button.dataset.close).close()));
@@ -155,11 +163,10 @@ async function loadPeriod() {
   const { start, end } = periodRange();
   try {
     if (configured) {
-      const periodQuery = query(collection(db, activitiesCollection), where("date", ">=", toISODate(start)), where("date", "<=", toISODate(end)));
-      const snapshot = await getDocs(periodQuery);
-      state.activities = snapshot.docs.map((record) => ({ id: record.id, ...record.data() })).sort(sortActivities);
+      const snapshot = await getDocs(collection(db, activitiesCollection));
+      state.activities = snapshot.docs.map((record) => ({ id: record.id, ...record.data() })).filter((item) => overlapsPeriod(item, start, end)).sort(sortActivities);
     } else {
-      state.activities = loadDemoData().filter((item) => item.date >= toISODate(start) && item.date <= toISODate(end)).sort(sortActivities);
+      state.activities = loadDemoData().filter((item) => overlapsPeriod(item, start, end)).sort(sortActivities);
     }
   } catch (error) {
     status.textContent = `No se pudo cargar la agenda. ${friendlyError(error)}`; return;
@@ -183,7 +190,7 @@ function updatePeriodTitle() {
 function render() {
   agenda.replaceChildren(); if (state.view === "week") renderWeek(); else renderMonth();
   const { visibleStart, visibleEnd } = periodRange();
-  const count = state.activities.filter((item) => item.date >= toISODate(visibleStart) && item.date <= toISODate(visibleEnd) && fromISODate(item.date).getDay() !== 0).length;
+  const count = state.activities.filter((item) => overlapsPeriod(item, visibleStart, visibleEnd)).length;
   status.textContent = `${count} ${count === 1 ? "actividad" : "actividades"}`;
 }
 
@@ -224,7 +231,7 @@ function createActivityRow(item) {
 function createDetailsContent(item, includeEditorActions) {
   const wrapper = document.createElement("div"); const details = document.createElement("div"); details.className = "activity-details";
   const combinedNotes = [item.requirements, item.observations].filter(Boolean).join(" · ");
-  [["Secretaría que organiza", item.secretary], ["Responsable", item.responsible], ["Plataforma", item.platform], ["Cuenta", item.account_used], ["Aula", item.classroom], ["Requerimientos / observaciones", combinedNotes || "Sin indicaciones"], ["Grabación", item.recording_required ? "Sí" : "No"]].forEach(([label, value]) => {
+  [["Fechas", dateRangeLabel(item)], ["Secretaría que organiza", item.secretary], ["Responsable", item.responsible], ["Plataforma", item.platform], ["Cuenta", item.account_used], ["Aula", item.classroom], ["Requerimientos / observaciones", combinedNotes || "Sin indicaciones"], ["Grabación", item.recording_required ? "Sí" : "No"]].forEach(([label, value]) => {
     const block = document.createElement("div"); block.className = "detail-item";
     const labelNode = document.createElement("span"); labelNode.className = "detail-label"; labelNode.textContent = label;
     const valueNode = document.createElement("span"); valueNode.className = "detail-value"; valueNode.textContent = value || "—";
@@ -246,7 +253,10 @@ function createDetailsContent(item, includeEditorActions) {
 }
 
 function actionButton(label, handler, className = "") { const button = document.createElement("button"); button.type = "button"; button.textContent = label; button.className = className; button.addEventListener("click", handler); return button; }
-function activitiesForDate(date) { return state.activities.filter((item) => item.date === toISODate(date)).sort(sortActivities); }
+function activitiesForDate(date) {
+  const key = toISODate(date);
+  return state.activities.filter((item) => item.date <= key && activityEndDate(item) >= key).sort(sortActivities);
+}
 
 function renderMonth() {
   const { start, end, visibleStart, visibleEnd } = periodRange();
@@ -270,9 +280,12 @@ function renderMonth() {
   }
   calendar.append(weekdays, grid);
   const mobileList = document.createElement("div"); mobileList.className = "mobile-month-list";
-  const monthItems = state.activities.filter((item) => item.date >= toISODate(visibleStart) && item.date <= toISODate(visibleEnd) && fromISODate(item.date).getDay() !== 0);
   const holidayDates = [...holidays].filter((date) => date >= toISODate(visibleStart) && date <= toISODate(visibleEnd));
-  const dates = [...new Set([...monthItems.map((item) => item.date), ...holidayDates])].sort();
+  const datesWithActivities = [];
+  for (let date = new Date(visibleStart); date <= visibleEnd; date = addDays(date, 1)) {
+    if (date.getDay() !== 0 && activitiesForDate(date).length) datesWithActivities.push(toISODate(date));
+  }
+  const dates = [...new Set([...datesWithActivities, ...holidayDates])].sort();
   if (!dates.length) { const empty = document.createElement("p"); empty.className = "empty-day"; empty.textContent = "Sin actividades este mes"; mobileList.append(empty); }
   else dates.forEach((dateValue) => {
     const date = fromISODate(dateValue); const section = document.createElement("section"); section.className = "day-section";
@@ -284,8 +297,7 @@ function renderMonth() {
 }
 
 function openDetail(item) {
-  const date = fromISODate(item.date);
-  el("detailDate").textContent = `${weekday(date)} ${formatDate(date, { day: "numeric", month: "long" })} · ${cleanTime(item.start_time)}–${cleanTime(item.end_time)}`;
+  el("detailDate").textContent = `${dateRangeLabel(item)} · ${cleanTime(item.start_time)}–${cleanTime(item.end_time)}`;
   el("detailTitle").textContent = item.name; el("detailBody").replaceChildren(createDetailsContent(item, true)); detailDialog.showModal();
 }
 
@@ -301,8 +313,10 @@ function openActivityForm(item = null) {
   if (!state.canEdit) return; if (detailDialog.open) detailDialog.close();
   el("activityForm").reset(); el("formError").hidden = true; el("activityId").value = item?.id || ""; el("formTitle").textContent = item ? "Editar actividad" : "Nueva actividad";
   const { start, end } = periodRange(); const today = localDate(new Date()); const defaultDate = today >= start && today <= end ? today : start;
-  el("date").value = item?.date || toISODate(defaultDate); el("startTime").value = cleanTime(item?.start_time) || "09:00"; el("endTime").value = cleanTime(item?.end_time) || "10:00";
-  el("recurrence").value = "none"; el("repeatUntil").value = item?.date || toISODate(calendarEnd);
+  el("date").value = item?.date || toISODate(defaultDate); el("endDate").value = item?.end_date || item?.date || toISODate(defaultDate);
+  el("startTime").value = cleanTime(item?.start_time) || "09:00"; el("endTime").value = cleanTime(item?.end_time) || "10:00";
+  el("recurrence").value = "none"; el("recurrence").disabled = Boolean(item?.id); el("recurrenceField").hidden = Boolean(item?.id);
+  el("repeatUntil").value = toISODate(calendarEnd);
   el("name").value = item?.name || ""; el("secretary").value = item?.secretary || ""; el("responsible").value = item?.responsible || ""; el("classroom").value = item?.classroom || "";
   el("platform").value = item?.platform || ""; el("accountUsed").value = item?.account_used || ""; el("meetingUrl").value = item?.meeting_url || "";
   el("requirements").value = [item?.requirements, item?.observations].filter(Boolean).join(" · "); el("recordingRequired").checked = Boolean(item?.recording_required);
@@ -311,17 +325,24 @@ function openActivityForm(item = null) {
 
 function updateWeekdayInput() {
   el("weekdayDisplay").value = el("date").value ? weekday(fromISODate(el("date").value)) : "";
+  if (!el("endDate").value || el("endDate").value < el("date").value) el("endDate").value = el("date").value;
+  el("endDate").min = el("date").value;
   if (el("recurrence").value !== "none" && el("repeatUntil").value < el("date").value) el("repeatUntil").value = el("date").value;
   el("repeatUntil").min = el("date").value;
+}
+function updateDateRangeInputs() {
+  if (el("endDate").value < el("date").value) el("endDate").value = el("date").value;
 }
 function toggleRecurrenceFields() { const repeats = el("recurrence").value !== "none"; el("repeatUntilField").hidden = !repeats; el("repeatUntil").required = repeats; }
 
 function activityPayload() {
-  return { date: el("date").value, start_time: el("startTime").value, end_time: el("endTime").value, name: el("name").value.trim(), secretary: el("secretary").value.trim(), responsible: el("responsible").value.trim(), classroom: el("classroom").value.trim(), activity_type: "", platform: el("platform").value.trim(), account_used: el("accountUsed").value.trim(), meeting_url: el("meetingUrl").value.trim(), requirements: el("requirements").value.trim(), observations: "", recording_required: el("recordingRequired").checked };
+  return { date: el("date").value, end_date: el("endDate").value, start_time: el("startTime").value, end_time: el("endTime").value, name: el("name").value.trim(), secretary: el("secretary").value.trim(), responsible: el("responsible").value.trim(), classroom: el("classroom").value.trim(), activity_type: "", platform: el("platform").value.trim(), account_used: el("accountUsed").value.trim(), meeting_url: el("meetingUrl").value.trim(), requirements: el("requirements").value.trim(), observations: "", recording_required: el("recordingRequired").checked };
 }
 
 function validateActivity(payload) {
   if (fromISODate(payload.date) > calendarEnd) return "La agenda finaliza el 28 de diciembre de 2026.";
+  if (fromISODate(payload.end_date) > calendarEnd) return "La actividad no puede finalizar después del 28 de diciembre de 2026.";
+  if (fromISODate(payload.end_date) < fromISODate(payload.date)) return "La fecha de finalización no puede ser anterior a la fecha de inicio.";
   if (fromISODate(payload.date).getDay() === 0) return "Los domingos no forman parte de esta agenda.";
   if (payload.end_time <= payload.start_time) return "La hora de finalización debe ser posterior a la de inicio.";
   if (payload.meeting_url && !isSafeUrl(payload.meeting_url)) return "El enlace debe comenzar con http:// o https://.";
@@ -332,7 +353,11 @@ function validateActivity(payload) {
 function recurrenceRecords(payload) {
   const recurrence = el("recurrence").value; if (recurrence === "none") return [payload];
   const step = recurrence === "weekly" ? 7 : 14; const until = fromISODate(el("repeatUntil").value); const seriesId = crypto.randomUUID(); const records = [];
-  for (let date = fromISODate(payload.date); date <= until && date <= calendarEnd; date = addDays(date, step)) records.push({ ...payload, date: toISODate(date), series_id: seriesId });
+  const durationDays = Math.round((fromISODate(payload.end_date) - fromISODate(payload.date)) / 86400000);
+  for (let date = fromISODate(payload.date); date <= until && date <= calendarEnd; date = addDays(date, step)) {
+    const occurrenceEnd = addDays(date, durationDays);
+    records.push({ ...payload, date: toISODate(date), end_date: toISODate(occurrenceEnd > calendarEnd ? calendarEnd : occurrenceEnd), series_id: seriesId });
+  }
   return records;
 }
 
@@ -365,7 +390,9 @@ async function writeNewActivities(records) {
   }
 }
 
-function duplicateActivity(item) { openActivityForm({ ...item, id: null, date: toISODate(addDays(fromISODate(item.date), 7)) }); }
+function duplicateActivity(item) {
+  openActivityForm({ ...item, id: null, date: toISODate(addDays(fromISODate(item.date), 7)), end_date: toISODate(addDays(fromISODate(activityEndDate(item)), 7)) });
+}
 async function deleteActivity(item) {
   if (!state.canEdit || !confirm(`¿Eliminar “${item.name}”?`)) return;
   try {
@@ -383,7 +410,9 @@ async function importCalendarFile(event) {
   const button = el("runImport"); button.disabled = true; button.textContent = "Importando…";
   try {
     const defaults = { secretary: el("importSecretary").value.trim(), responsible: el("importResponsible").value.trim(), platform: el("importPlatform").value.trim(), account_used: el("importAccount").value.trim(), requirements: el("importRequirements").value.trim(), recording_required: el("importRecording").checked };
-    const parsed = parseICS(await file.text(), defaults).filter((item) => fromISODate(item.date) <= calendarEnd && fromISODate(item.date).getDay() !== 0);
+    const parsed = parseICS(await file.text(), defaults)
+      .filter((item) => fromISODate(item.date) <= calendarEnd && fromISODate(item.date).getDay() !== 0)
+      .map((item) => ({ ...item, end_date: activityEndDate(item) > toISODate(calendarEnd) ? toISODate(calendarEnd) : activityEndDate(item) }));
     if (!parsed.length) throw new Error("No se encontraron eventos con fecha y horario en el archivo.");
     let newEvents = parsed;
     if (configured) {
@@ -407,7 +436,8 @@ function parseICS(text, defaults) {
     const start = parseICSDate(values.DTSTART.value); const end = values.DTEND ? parseICSDate(values.DTEND.value) : { date: new Date(start.date.getTime() + 3600000), allDay: false };
     const description = unescapeICS(values.DESCRIPTION?.value || ""); const location = unescapeICS(values.LOCATION?.value || "") || "Lugar a confirmar"; const summary = unescapeICS(values.SUMMARY.value);
     const url = extractEventUrl(unescapeICS(values.URL?.value || ""), description); const platform = defaults.platform || detectPlatform(`${url} ${description}`); const uid = unescapeICS(values.UID?.value || `${summary}-${values.DTSTART.value}`);
-    const base = { date: toISODate(start.date), start_time: start.allDay ? "09:00" : timeFromDate(start.date), end_time: end.allDay ? "10:00" : timeFromDate(end.date), name: summary.slice(0, 160), secretary: defaults.secretary, responsible: defaults.responsible, classroom: location.slice(0, 100), activity_type: "", requirements: [description, defaults.requirements].filter(Boolean).join(" · ").slice(0, 1000), observations: "", meeting_url: url, platform, account_used: defaults.account_used, recording_required: defaults.recording_required, source_uid: `${uid}-${toISODate(start.date)}` };
+    const importedEndDate = start.allDay && end.allDay ? addDays(end.date, -1) : end.date;
+    const base = { date: toISODate(start.date), end_date: toISODate(importedEndDate < start.date ? start.date : importedEndDate), start_time: start.allDay ? "09:00" : timeFromDate(start.date), end_time: end.allDay ? "10:00" : timeFromDate(end.date), name: summary.slice(0, 160), secretary: defaults.secretary, responsible: defaults.responsible, classroom: location.slice(0, 100), activity_type: "", requirements: [description, defaults.requirements].filter(Boolean).join(" · ").slice(0, 1000), observations: "", meeting_url: url, platform, account_used: defaults.account_used, recording_required: defaults.recording_required, source_uid: `${uid}-${toISODate(start.date)}` };
     result.push(base); expandSimpleRecurrence(base, values.RRULE?.value, start.date, end.date, uid).forEach((item) => result.push(item));
   });
   const unique = new Map(); result.forEach((item) => unique.set(item.source_uid, item)); return [...unique.values()].sort(sortActivities);
@@ -435,7 +465,8 @@ function expandSimpleRecurrence(base, ruleText, startDate, endDate, uid) {
     const diffDays = Math.round((localDate(cursor) - localDate(startDate)) / 86400000);
     const matches = rule.FREQ === "DAILY" ? diffDays % interval === 0 : Math.floor(diffDays / 7) % interval === 0 && (byDays.length ? byDays.includes(cursor.getDay()) : cursor.getDay() === startDate.getDay());
     if (!matches) continue; const end = new Date(cursor.getTime() + duration);
-    occurrences.push({ ...base, date: toISODate(cursor), start_time: timeFromDate(cursor), end_time: timeFromDate(end), source_uid: `${uid}-${toISODate(cursor)}` });
+    const durationDays = Math.round((fromISODate(base.end_date) - fromISODate(base.date)) / 86400000);
+    occurrences.push({ ...base, date: toISODate(cursor), end_date: toISODate(addDays(cursor, durationDays)), start_time: timeFromDate(cursor), end_time: timeFromDate(end), source_uid: `${uid}-${toISODate(cursor)}` });
   }
   return occurrences;
 }
