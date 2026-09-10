@@ -15,19 +15,23 @@ El proyecto ya contiene la configuración del proyecto Firebase `agenda-hibridac
 
 ## Funciones incluidas
 
-- Semana actual automática y navegación entre semanas.
-- Vista mensual; en celular se transforma en una lista vertical legible.
+- Vistas por día, semana y mes; en celular se transforman en listas verticales legibles.
+- Día actual destacado visualmente en las vistas diaria, semanal y mensual.
 - Agenda de lunes a sábado, sin domingos.
 - Cierre de agenda el 28 de diciembre de 2026.
 - Feriados marcados: 12 de octubre, 23 de noviembre, 7 y 8 de diciembre.
-- Tarjetas compactas con día, horario, actividad y aula; el resto se despliega.
+- Tarjetas compactas con horario, actividad, aula y logo de plataforma; el resto se despliega.
+- Identificación por color de las diez áreas organizadoras y referencia desplegable en la agenda.
+- Logos compactos de Google Meet, Microsoft Teams y Zoom.
 - Botones para abrir o copiar el enlace.
 - Carga manual, edición, duplicación y eliminación.
 - Edición individual o conjunta de todas las actividades que tengan el mismo nombre.
+- Listas desplegables institucionales para área organizadora y aula, con opción de indicar otro lugar.
+- El formulario de edición solo se cierra mediante los botones Cerrar o Cancelar, para evitar cierres accidentales.
+- Para Secretaría Académica: selección dependiente de carrera y materia.
 - Rango de fechas para actividades que duran varios días; se muestran cada día del período, excepto los domingos.
 - Actividades únicas, semanales o cada 15 días.
 - Importación inicial desde Google Calendar mediante `.ics`.
-- Limpieza segura de actividades importadas anteriores al 9 de septiembre de 2026, sin afectar las futuras ni las cargas manuales.
 - Campo de grabación.
 - Tipografía Montserrat, color `#014a7d` y logo institucional.
 
@@ -36,7 +40,10 @@ El proyecto ya contiene la configuración del proyecto Firebase `agenda-hibridac
 ```text
 agenda-hibrida-derecho/
 ├── assets/
-│   └── logo-fd-blanco.png
+│   ├── logo-fd-blanco.png
+│   ├── platform-google-meet.png
+│   ├── platform-microsoft-teams.png
+│   └── platform-zoom.png
 ├── firebase/
 │   └── firestore.rules
 ├── .nojekyll
@@ -74,8 +81,9 @@ Este paso habilita el botón **Administrar agenda** en el sitio publicado.
 3. Ingresar con la cuenta `facultad@derecho.uncu.edu.ar`.
 4. Presionar **+ Cargar actividad**.
 5. Completar fecha de inicio, fecha de finalización, horario, actividad, Secretaría, responsable, aula, plataforma, cuenta, enlace, grabación y observaciones. Si dura un solo día, colocar la misma fecha en ambos campos.
-6. En **Repetición**, elegir **No se repite**, **Todas las semanas** o **Cada 15 días**. Para una repetición, indicar hasta qué fecha debe generarse.
-7. Presionar **Guardar actividad**.
+6. Si se elige **Secretaría Académica**, seleccionar también la carrera y la materia. Si el lugar no figura en la lista, elegir **Otro (especificar)**.
+7. En **Repetición**, elegir **No se repite**, **Todas las semanas** o **Cada 15 días**. Para una repetición, indicar hasta qué fecha debe generarse.
+8. Presionar **Guardar actividad**.
 
 No se edita ningún archivo para el uso cotidiano.
 
@@ -87,7 +95,7 @@ No se edita ningún archivo para el uso cotidiano.
 
 Al duplicar, la copia se prepara automáticamente para la semana siguiente. Se puede modificar la fecha antes de guardarla.
 
-Al editar, se puede marcar **Aplicar estos cambios a todas las actividades con el mismo nombre**. Esta opción actualiza el nombre, horario, Secretaría, responsable, aula, plataforma, cuenta, enlace, grabación y observaciones de todas las coincidencias, pero conserva las fechas propias de cada actividad.
+Al editar, se puede marcar **Aplicar estos cambios a todas las actividades con el mismo nombre**. Esta opción actualiza el nombre, horario, área organizadora, responsable, aula, plataforma, cuenta, enlace, grabación y observaciones de todas las coincidencias, pero conserva las fechas propias de cada actividad.
 
 ## Importación inicial desde Google Calendar
 

@@ -38,6 +38,7 @@
         </div>
         <div class="toolbar-right">
           <div class="view-switch" role="group" aria-label="Tipo de vista">
+            <button id="dayView" class="view-button" type="button" aria-pressed="false">Día</button>
             <button id="weekView" class="view-button active" type="button" aria-pressed="true">Semana</button>
             <button id="monthView" class="view-button" type="button" aria-pressed="false">Mes</button>
           </div>
@@ -48,11 +49,15 @@
           </div>
           <div class="editor-actions editor-only" hidden>
             <button id="importCalendar" class="button button-secondary" type="button" hidden>Importar calendario</button>
-            <button id="cleanupPastImports" class="button button-secondary" type="button">Eliminar actividades anteriores</button>
             <button id="newActivity" class="button button-primary" type="button">+ Cargar actividad</button>
           </div>
         </div>
       </section>
+
+      <details class="organizer-legend">
+        <summary>Colores de las áreas organizadoras</summary>
+        <div id="organizerLegendItems" class="organizer-legend-items"></div>
+      </details>
 
       <div id="status" class="status" role="status" aria-live="polite">Cargando agenda…</div>
       <section id="agenda" class="agenda" aria-label="Actividades"></section>
@@ -81,9 +86,12 @@
           </label>
           <label id="repeatUntilField" hidden>Repetir hasta<input id="repeatUntil" type="date" max="2026-12-28" /></label>
           <label class="wide">Nombre de la actividad<input id="name" type="text" maxlength="160" required /></label>
-          <label>Secretaría que organiza<input id="secretary" type="text" maxlength="120" required /></label>
+          <label>Organiza<select id="secretary" required></select></label>
+          <label id="careerField" hidden>Carrera<select id="career"></select></label>
+          <label id="subjectField" class="wide" hidden>Materia<select id="subject"></select></label>
           <label>Responsable<input id="responsible" type="text" maxlength="100" required /></label>
-          <label>Aula / lugar<input id="classroom" type="text" maxlength="100" required /></label>
+          <label>Aula / lugar<select id="classroom" required></select></label>
+          <label id="otherClassroomField" hidden>Otro lugar<input id="otherClassroom" type="text" maxlength="100" /></label>
           <label>Plataforma<input id="platform" type="text" list="platformOptions" maxlength="80" placeholder="Zoom, Google Meet…" /></label>
           <datalist id="platformOptions"><option value="Zoom"></option><option value="Google Meet"></option><option value="Microsoft Teams"></option><option value="YouTube"></option></datalist>
           <label class="wide">Cuenta utilizada<input id="accountUsed" type="text" maxlength="160" /></label>
@@ -111,7 +119,7 @@
         <fieldset>
           <legend>Datos comunes para los eventos importados</legend>
           <div class="form-grid">
-            <label>Secretaría que organiza<input id="importSecretary" type="text" maxlength="120" required /></label>
+            <label>Organiza<input id="importSecretary" type="text" maxlength="120" required /></label>
             <label>Responsable<input id="importResponsible" type="text" maxlength="100" required /></label>
             <label>Plataforma<input id="importPlatform" type="text" list="platformOptions" maxlength="80" /></label>
             <label>Cuenta utilizada<input id="importAccount" type="text" maxlength="160" /></label>
