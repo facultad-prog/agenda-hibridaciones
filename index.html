@@ -9,7 +9,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="styles.css?v=6" />
   </head>
   <body>
     <header class="site-header">
@@ -53,11 +53,6 @@
           </div>
         </div>
       </section>
-
-      <details class="organizer-legend">
-        <summary>Colores de las áreas organizadoras</summary>
-        <div id="organizerLegendItems" class="organizer-legend-items"></div>
-      </details>
 
       <div id="status" class="status" role="status" aria-live="polite">Cargando agenda…</div>
       <section id="agenda" class="agenda" aria-label="Actividades"></section>
@@ -147,7 +142,15 @@
 
     <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
 
-    <script src="config.js"></script>
-    <script type="module" src="app.js"></script>
+    <script src="config.js?v=6"></script>
+    <script type="module" src="app.js?v=6"></script>
+    <script>
+      window.setTimeout(function () {
+        var message = document.getElementById("status");
+        if (message && message.textContent.indexOf("Cargando agenda") !== -1) {
+          message.textContent = "No se pudo iniciar la agenda. Actualizá la página con Ctrl + F5.";
+        }
+      }, 12000);
+    </script>
   </body>
 </html>

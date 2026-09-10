@@ -21,7 +21,7 @@ El proyecto ya contiene la configuración del proyecto Firebase `agenda-hibridac
 - Cierre de agenda el 28 de diciembre de 2026.
 - Feriados marcados: 12 de octubre, 23 de noviembre, 7 y 8 de diciembre.
 - Tarjetas compactas con horario, actividad, aula y logo de plataforma; el resto se despliega.
-- Identificación por color de las diez áreas organizadoras y referencia desplegable en la agenda.
+- El nombre del área organizadora aparece con su color institucional al desplegar una actividad.
 - Logos compactos de Google Meet, Microsoft Teams y Zoom.
 - Botones para abrir o copiar el enlace.
 - Carga manual, edición, duplicación y eliminación.

@@ -111,7 +111,6 @@ function writeDemoData(records) { localStorage.setItem(demoStorageKey, JSON.stri
 async function init() {
   el("demoBanner").hidden = configured;
   populateFormOptions();
-  renderOrganizerLegend();
   bindEvents();
   if (configured) {
     await setPersistence(auth, browserLocalPersistence).catch(() => {});
@@ -163,15 +162,6 @@ function populateFormOptions() {
   populateSelect(el("subject"), [], "Primero seleccioná una carrera");
   populateSelect(el("classroom"), [...classroomOptions, "__other__"], "Seleccionar aula o lugar");
   el("classroom").querySelector('option[value="__other__"]').textContent = "Otro (especificar)";
-}
-
-function renderOrganizerLegend() {
-  const container = el("organizerLegendItems");
-  secretaryOptions.forEach((name) => {
-    const item = document.createElement("span"); item.className = "organizer-legend-item";
-    const swatch = document.createElement("i"); swatch.style.backgroundColor = organizerColor(name);
-    item.append(swatch, document.createTextNode(name)); container.append(item);
-  });
 }
 
 function updateAcademicFields(preferredSubject = "") {
@@ -332,7 +322,6 @@ function createDayHeading(date) {
 
 function createActivityRow(item) {
   const details = document.createElement("details"); details.className = "activity-row";
-  details.style.setProperty("--area-color", organizerColor(item.secretary));
   const summary = document.createElement("summary"); summary.className = "activity-summary";
   const time = document.createElement("span"); time.className = "summary-time"; time.textContent = `${cleanTime(item.start_time)}–${cleanTime(item.end_time)}`;
   if (item.recording_required) { const dot = document.createElement("i"); dot.className = "recording-dot"; dot.title = "Requiere grabación"; time.append(dot); }
@@ -357,7 +346,7 @@ function createDetailsContent(item, includeEditorActions) {
     const block = document.createElement("div"); block.className = "detail-item";
     const labelNode = document.createElement("span"); labelNode.className = "detail-label"; labelNode.textContent = label;
     const valueNode = document.createElement("span"); valueNode.className = "detail-value";
-    if (label === "Organiza") { const swatch = document.createElement("i"); swatch.className = "organizer-swatch"; swatch.style.backgroundColor = organizerColor(item.secretary); valueNode.append(swatch); }
+    if (label === "Organiza") { valueNode.classList.add("organizer-value"); valueNode.style.color = organizerColor(item.secretary); }
     if (label === "Plataforma") { const icon = createPlatformIcon(item.platform); if (icon) valueNode.append(icon); }
     valueNode.append(document.createTextNode(value || "—"));
     block.append(labelNode, valueNode); details.append(block);
@@ -400,7 +389,6 @@ function renderMonth() {
     if (isHoliday(date)) { const badge = document.createElement("span"); badge.className = "month-holiday"; badge.textContent = "Feriado"; cell.append(badge); }
     activitiesForDate(date).forEach((item) => {
       const button = document.createElement("button"); button.type = "button"; button.className = "month-event";
-      button.style.setProperty("--area-color", organizerColor(item.secretary));
       const time = document.createElement("strong"); time.textContent = cleanTime(item.start_time); button.append(time, document.createTextNode(item.name));
       button.addEventListener("click", () => openDetail(item)); cell.append(button);
     });
@@ -649,4 +637,6 @@ function friendlyError(error) {
   return error?.message || "Intentá nuevamente.";
 }
 
-init();
+init().catch((error) => {
+  status.textContent = `No se pudo iniciar la agenda. ${friendlyError(error)}`;
+});
