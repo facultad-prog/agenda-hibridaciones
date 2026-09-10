@@ -325,7 +325,14 @@ function createActivityRow(item) {
   const summary = document.createElement("summary"); summary.className = "activity-summary";
   const time = document.createElement("span"); time.className = "summary-time"; time.textContent = `${cleanTime(item.start_time)}–${cleanTime(item.end_time)}`;
   if (item.recording_required) { const dot = document.createElement("i"); dot.className = "recording-dot"; dot.title = "Requiere grabación"; time.append(dot); }
-  const title = document.createElement("span"); title.className = "summary-title"; title.textContent = item.name;
+  const title = document.createElement("span"); title.className = "summary-title";
+  const activityName = document.createElement("strong"); activityName.className = "summary-activity-name"; activityName.textContent = item.name;
+  title.append(activityName);
+  if (item.secretary) {
+    const separator = document.createElement("span"); separator.className = "summary-separator"; separator.textContent = "|";
+    const organizer = document.createElement("span"); organizer.className = "summary-organizer"; organizer.textContent = organizerName(item.secretary); organizer.style.color = organizerColor(item.secretary);
+    title.append(separator, organizer);
+  }
   const meta = document.createElement("span"); meta.className = "summary-meta";
   const room = document.createElement("span"); room.className = "summary-room"; room.textContent = item.classroom || "Lugar a confirmar"; meta.append(room);
   const platformIcon = createPlatformIcon(item.platform); if (platformIcon) meta.append(platformIcon);
