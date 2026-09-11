@@ -1,6 +1,6 @@
-# Agenda de Hibridaciones — Facultad de Derecho
+# Agenda de Hibridaciones y Transmisiones — Facultad de Derecho
 
-Aplicación web institucional para consultar y administrar las actividades híbridas de la Facultad de Derecho.
+Aplicación web institucional para consultar y administrar las hibridaciones y transmisiones de la Facultad de Derecho.
 
 ## Arquitectura elegida
 
@@ -22,10 +22,12 @@ El proyecto ya contiene la configuración del proyecto Firebase `agenda-hibridac
 - Feriados marcados: 12 de octubre, 23 de noviembre, 7 y 8 de diciembre.
 - Tarjetas compactas con horario, actividad, área organizadora identificada por color, aula y logo de plataforma; el resto se despliega.
 - El nombre del área organizadora aparece con su color institucional al desplegar una actividad.
+- Tipo de actividad seleccionable entre Hibridación y Transmisión; las transmisiones se identifican sutilmente en las vistas.
+- Logo de YouTube para las transmisiones realizadas mediante esa plataforma.
 - Logos compactos de Google Meet, Microsoft Teams y Zoom.
 - Botones para abrir o copiar el enlace.
 - Carga manual, edición, duplicación y eliminación.
-- Edición individual o conjunta de todas las actividades que tengan el mismo nombre.
+- Edición individual o conjunta de las actividades que tengan el mismo nombre y el mismo día de la semana.
 - Listas desplegables institucionales para área organizadora y aula, con opción de indicar otro lugar.
 - El formulario de edición solo se cierra mediante los botones Cerrar o Cancelar, para evitar cierres accidentales.
 - Para Secretaría Académica: selección dependiente de carrera y materia.
@@ -43,7 +45,8 @@ agenda-hibrida-derecho/
 │   ├── logo-fd-blanco.png
 │   ├── platform-google-meet.png
 │   ├── platform-microsoft-teams.png
-│   └── platform-zoom.png
+│   ├── platform-zoom.png
+│   └── platform-youtube.png
 ├── firebase/
 │   └── firestore.rules
 ├── .nojekyll
@@ -80,7 +83,7 @@ Este paso habilita el botón **Administrar agenda** en el sitio publicado.
 2. Presionar **Administrar agenda**.
 3. Ingresar con la cuenta `facultad@derecho.uncu.edu.ar`.
 4. Presionar **+ Cargar actividad**.
-5. Completar fecha de inicio, fecha de finalización, horario, actividad, Secretaría, responsable, aula, plataforma, cuenta, enlace, grabación y observaciones. Si dura un solo día, colocar la misma fecha en ambos campos.
+5. Completar fecha de inicio, fecha de finalización, horario, actividad, tipo, área organizadora, responsable, aula, plataforma, cuenta, enlace, grabación y observaciones. Si dura un solo día, colocar la misma fecha en ambos campos.
 6. Si se elige **Secretaría Académica**, seleccionar también la carrera y la materia. Si el lugar no figura en la lista, elegir **Otro (especificar)**.
 7. En **Repetición**, elegir **No se repite**, **Todas las semanas** o **Cada 15 días**. Para una repetición, indicar hasta qué fecha debe generarse.
 8. Presionar **Guardar actividad**.
@@ -95,7 +98,7 @@ No se edita ningún archivo para el uso cotidiano.
 
 Al duplicar, la copia se prepara automáticamente para la semana siguiente. Se puede modificar la fecha antes de guardarla.
 
-Al editar, se puede marcar **Aplicar estos cambios a todas las actividades con el mismo nombre**. Esta opción actualiza el nombre, horario, área organizadora, responsable, aula, plataforma, cuenta, enlace, grabación y observaciones de todas las coincidencias, pero conserva las fechas propias de cada actividad.
+Al editar, se puede marcar **Aplicar estos cambios a las actividades con el mismo nombre y día**. Esta opción actualiza el nombre, horario, tipo, área organizadora, responsable, aula, plataforma, cuenta, enlace, grabación y observaciones únicamente en las coincidencias que comienzan el mismo día de la semana, pero conserva las fechas propias de cada actividad.
 
 ## Importación inicial desde Google Calendar
 
@@ -113,7 +116,7 @@ La importación inicial ya fue realizada. En la versión publicada, el botón de
 1. Ingresar en la agenda con la cuenta responsable.
 2. Presionar **Importar calendario**.
 3. Seleccionar el archivo `.ics`.
-4. Completar los datos comunes que no estaban en Calendar: Secretaría, responsable, plataforma, cuenta, grabación y observaciones.
+4. Completar los datos comunes que no estaban en Calendar: área organizadora, responsable, plataforma, cuenta, grabación y observaciones.
 5. Presionar **Importar actividades**.
 
 La aplicación toma automáticamente el título, la fecha, el horario, la ubicación y los enlaces reconocibles. Evita volver a importar el mismo evento si se usa nuevamente el mismo archivo.
