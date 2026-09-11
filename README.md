@@ -22,7 +22,8 @@ El proyecto ya contiene la configuración del proyecto Firebase `agenda-hibridac
 - Feriados marcados: 12 de octubre, 23 de noviembre, 7 y 8 de diciembre.
 - Tarjetas compactas con horario, actividad, área organizadora identificada por color, aula y logo de plataforma; el resto se despliega.
 - El nombre del área organizadora aparece con su color institucional al desplegar una actividad.
-- Tipo de actividad seleccionable entre Híbrida, Virtual y Transmisión. Los tres tipos muestran un rótulo pequeño; las virtuales no solicitan ni muestran Aula/Lugar.
+- Tipo de actividad seleccionable entre Híbrida, Virtual y Transmisión. Los tres tipos muestran un rótulo pequeño en azul `#023764`, ubicado sobre Aula/Lugar y la plataforma; las virtuales no solicitan ni muestran Aula/Lugar.
+- Filtro mediante casillas para mostrar u ocultar actividades híbridas, virtuales y transmisiones.
 - Logo de YouTube para las transmisiones realizadas mediante esa plataforma.
 - Logos compactos de Google Meet, Microsoft Teams y Zoom.
 - Botones para abrir o copiar el enlace.

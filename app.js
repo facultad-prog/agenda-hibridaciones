@@ -75,6 +75,10 @@ function normalizeActivityName(value) { return String(value || "").trim().toLoca
 function isTransmission(item) { return ["transmission", "transmisión", "transmision"].includes(String(item?.activity_type || "").trim().toLocaleLowerCase(locale)); }
 function isVirtual(item) { return String(item?.activity_type || "").trim().toLocaleLowerCase(locale) === "virtual"; }
 function activityTypeLabel(item) { return isTransmission(item) ? "Transmisión" : isVirtual(item) ? "Virtual" : "Híbrida"; }
+function activityTypeKey(item) { return isTransmission(item) ? "transmission" : isVirtual(item) ? "virtual" : "hybrid"; }
+function matchesTypeFilter(item) {
+  return { hybrid: el("filterHybrid").checked, virtual: el("filterVirtual").checked, transmission: el("filterTransmission").checked }[activityTypeKey(item)];
+}
 function isHoliday(date) { return holidays.has(toISODate(date)); }
 function isAfterCalendarEnd(date) { return localDate(date) > calendarEnd; }
 function sortActivities(a, b) { return `${a.date}${cleanTime(a.start_time)}${a.name}`.localeCompare(`${b.date}${cleanTime(b.start_time)}${b.name}`, locale); }
@@ -150,6 +154,7 @@ function bindEvents() {
   el("career").addEventListener("change", () => updateAcademicFields());
   el("classroom").addEventListener("change", toggleOtherClassroom);
   el("activityType").addEventListener("change", toggleActivityTypeFields);
+  document.querySelectorAll("[data-type-filter]").forEach((input) => input.addEventListener("change", render));
   el("icsFile").addEventListener("change", () => { el("icsFileName").textContent = el("icsFile").files[0]?.name || "Ningún archivo seleccionado"; });
   document.querySelectorAll("[data-close]").forEach((button) => button.addEventListener("click", () => el(button.dataset.close).close()));
   [importDialog, detailDialog].forEach((dialog) => dialog.addEventListener("click", (event) => { if (event.target === dialog) dialog.close(); }));
@@ -303,7 +308,7 @@ function updatePeriodTitle() {
 function render() {
   agenda.replaceChildren(); if (state.view === "day") renderDay(); else if (state.view === "week") renderWeek(); else renderMonth();
   const { visibleStart, visibleEnd } = periodRange();
-  const count = state.activities.filter((item) => overlapsPeriod(item, visibleStart, visibleEnd)).length;
+  const count = state.activities.filter((item) => overlapsPeriod(item, visibleStart, visibleEnd) && matchesTypeFilter(item)).length;
   status.textContent = `${count} ${count === 1 ? "actividad" : "actividades"}`;
 }
 
@@ -354,11 +359,12 @@ function createActivityRow(item) {
     const organizer = document.createElement("span"); organizer.className = "summary-organizer"; organizer.textContent = organizerName(item.secretary); organizer.style.color = organizerColor(item.secretary);
     title.append(organizer);
   }
-  const activityType = isTransmission(item) ? "transmission" : isVirtual(item) ? "virtual" : "hybrid";
-  const badge = document.createElement("span"); badge.className = `${activityType}-badge`; badge.textContent = activityTypeLabel(item); title.append(badge);
   const meta = document.createElement("span"); meta.className = "summary-meta";
-  if (!isVirtual(item)) { const room = document.createElement("span"); room.className = "summary-room"; room.textContent = item.classroom || "Lugar a confirmar"; meta.append(room); }
-  const platformIcon = createPlatformIcon(item.platform); if (platformIcon) meta.append(platformIcon);
+  const type = document.createElement("span"); type.className = "summary-type"; type.textContent = activityTypeLabel(item);
+  const placePlatform = document.createElement("span"); placePlatform.className = "summary-place-platform";
+  if (!isVirtual(item)) { const room = document.createElement("span"); room.className = "summary-room"; room.textContent = item.classroom || "Lugar a confirmar"; placePlatform.append(room); }
+  const platformIcon = createPlatformIcon(item.platform); if (platformIcon) placePlatform.append(platformIcon);
+  meta.append(type, placePlatform);
   const chevron = document.createElement("span"); chevron.className = "summary-chevron"; chevron.textContent = "⌄";
   summary.append(time, title, meta, chevron);
   const expanded = document.createElement("div"); expanded.className = "activity-expanded"; expanded.append(createDetailsContent(item, true));
@@ -369,17 +375,17 @@ function createDetailsContent(item, includeEditorActions) {
   const wrapper = document.createElement("div"); const details = document.createElement("div"); details.className = "activity-details";
   const combinedNotes = [item.requirements, item.observations].filter(Boolean).join(" · ");
   const fields = [["Fechas", dateRangeLabel(item)], ["Organiza", organizerName(item.secretary)]];
-  fields.push(["Tipo", activityTypeLabel(item)]);
   if (item.career) fields.push(["Carrera", item.career]);
   if (item.subject) fields.push(["Materia / Ingreso", item.subject]);
   fields.push(["Responsable / contacto", item.responsible]);
   if (!isVirtual(item)) fields.push(["Aula/Lugar", item.classroom]);
-  fields.push(["Plataforma", item.platform], ["Cuenta", item.account_used], ["Grabación", item.recording_required ? "Sí" : "No"], ["Requerimientos / observaciones", combinedNotes || "Sin indicaciones"]);
+  fields.push(["Tipo", activityTypeLabel(item)], ["Plataforma", item.platform], ["Cuenta", item.account_used], ["Grabación", item.recording_required ? "Sí" : "No"], ["Requerimientos / observaciones", combinedNotes || "Sin indicaciones"]);
   fields.forEach(([label, value]) => {
     const block = document.createElement("div"); block.className = "detail-item";
     const labelNode = document.createElement("span"); labelNode.className = "detail-label"; labelNode.textContent = label;
     const valueNode = document.createElement("span"); valueNode.className = "detail-value";
     if (label === "Organiza") { valueNode.classList.add("organizer-value"); valueNode.style.color = organizerColor(item.secretary); }
+    if (label === "Tipo") valueNode.classList.add("activity-type-value");
     if (label === "Plataforma") { const icon = createPlatformIcon(item.platform); if (icon) valueNode.append(icon); }
     if (label === "Grabación" && item.recording_required) { const dot = document.createElement("i"); dot.className = "recording-dot detail-recording-dot"; dot.title = "Requiere grabación"; valueNode.append(dot); }
     valueNode.append(document.createTextNode(value || "—"));
@@ -405,7 +411,7 @@ function createDetailsContent(item, includeEditorActions) {
 function actionButton(label, handler, className = "") { const button = document.createElement("button"); button.type = "button"; button.textContent = label; button.className = className; button.addEventListener("click", handler); return button; }
 function activitiesForDate(date) {
   const key = toISODate(date);
-  return state.activities.filter((item) => item.date <= key && activityEndDate(item) >= key).sort(sortActivities);
+  return state.activities.filter((item) => item.date <= key && activityEndDate(item) >= key && matchesTypeFilter(item)).sort(sortActivities);
 }
 
 function renderMonth() {
@@ -424,7 +430,7 @@ function renderMonth() {
     activitiesForDate(date).forEach((item) => {
       const button = document.createElement("button"); button.type = "button"; button.className = "month-event";
       if (isTransmission(item)) button.classList.add("transmission");
-      const activityType = isTransmission(item) ? "transmission" : isVirtual(item) ? "virtual" : "hybrid";
+      const activityType = activityTypeKey(item);
       const badge = document.createElement("span"); badge.className = `month-${activityType}`; badge.textContent = activityTypeLabel(item); button.append(badge);
       const time = document.createElement("strong"); time.textContent = cleanTime(item.start_time); button.append(time, document.createTextNode(item.name));
       button.addEventListener("click", () => openDetail(item)); cell.append(button);
