@@ -52,7 +52,7 @@ const academicSubjects = {
   ]
 };
 
-const state = { view: "week", cursor: new Date(), activities: [], user: null, canEdit: !configured };
+const state = { view: "day", cursor: new Date(), activities: [], user: null, canEdit: !configured };
 const el = (id) => document.getElementById(id);
 const agenda = el("agenda");
 const status = el("status");
@@ -125,7 +125,7 @@ async function init() {
     });
   } else {
     updateAuthUI();
-    setView("week");
+    setView("day");
   }
 }
 

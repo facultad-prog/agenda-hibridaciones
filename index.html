@@ -9,7 +9,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="styles.css?v=10" />
+    <link rel="stylesheet" href="styles.css?v=11" />
   </head>
   <body>
     <header class="site-header">
@@ -33,13 +33,13 @@
 
       <section class="agenda-toolbar" aria-label="Controles de agenda">
         <div class="period-heading">
-          <p id="viewEyebrow" class="eyebrow">Vista semanal</p>
-          <h2 id="periodTitle">Semana actual</h2>
+          <p id="viewEyebrow" class="eyebrow">Vista diaria</p>
+          <h2 id="periodTitle">Día actual</h2>
         </div>
         <div class="toolbar-right">
           <div class="view-switch" role="group" aria-label="Tipo de vista">
-            <button id="dayView" class="view-button" type="button" aria-pressed="false">Día</button>
-            <button id="weekView" class="view-button active" type="button" aria-pressed="true">Semana</button>
+            <button id="dayView" class="view-button active" type="button" aria-pressed="true">Día</button>
+            <button id="weekView" class="view-button" type="button" aria-pressed="false">Semana</button>
             <button id="monthView" class="view-button" type="button" aria-pressed="false">Mes</button>
           </div>
           <div class="period-actions">
@@ -144,8 +144,8 @@
 
     <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
 
-    <script src="config.js?v=10"></script>
-    <script type="module" src="app.js?v=10"></script>
+    <script src="config.js?v=11"></script>
+    <script type="module" src="app.js?v=11"></script>
     <script>
       window.setTimeout(function () {
         var message = document.getElementById("status");
