@@ -84,6 +84,7 @@
           <label class="wide">Nombre de la actividad<input id="name" type="text" maxlength="160" required /></label>
           <label>Tipo de actividad<select id="activityType" required><option value="hybrid">Hibridación</option><option value="transmission">Transmisión</option></select></label>
           <label>Organiza<select id="secretary" required></select></label>
+          <label id="otherSecretaryField" hidden>Otro organizador<input id="otherSecretary" type="text" maxlength="120" /></label>
           <label id="careerField" hidden>Carrera<select id="career"></select></label>
           <label id="subjectField" class="wide" hidden>Materia<select id="subject"></select></label>
           <label>Responsable<input id="responsible" type="text" maxlength="100" required /></label>
@@ -145,7 +146,7 @@
     <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
 
     <script src="config.js?v=11"></script>
-    <script type="module" src="app.js?v=11"></script>
+    <script type="module" src="app.js?v=14"></script>
     <script>
       window.setTimeout(function () {
         var message = document.getElementById("status");

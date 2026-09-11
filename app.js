@@ -14,8 +14,8 @@ const locale = "es-AR";
 const demoStorageKey = "agenda-hibrida-demo-firebase-v2";
 const calendarEnd = new Date(2026, 11, 28);
 const holidays = new Set(["2026-10-12", "2026-11-23", "2026-12-07", "2026-12-08"]);
-const classroomOptions = ["Aula A", "Aula B", "Aula C", "Aula D", "Aula E", "Aula F", "Aula G", "Aula H (Magnita)", "Aula I", "Aula J", "Aula K", "Aula L", "Aula M", "Laboratorio", "Aula Magna", "Consejo Directivo"];
-const secretaryOptions = ["Secretaría Académica", "Secretaría de Posgrado", "Secretaría de Investigación, Ciencia y Técnica", "Secretaría de Relaciones Estudiantiles y Egresados/as", "Secretaría de Extensión, Vinculación y Territorio", "Secretaría General", "Secretaría Económica - Financiera", "Dirección TIC", "Biblioteca", "Decanato"];
+const classroomOptions = ["Aula A", "Aula B", "Aula C", "Aula D", "Aula E", "Aula F", "Aula G", "Aula Magna", "Aula H (Magnita)", "Aula I", "Aula J", "Aula K", "Aula L", "Aula M", "Laboratorio", "Biblioteca", "Consejo Directivo"];
+const secretaryOptions = ["Secretaría Académica", "Secretaría de Posgrado", "Secretaría de Investigación, Ciencia y Técnica", "Secretaría de Relaciones Estudiantiles y Egresados/as", "Secretaría de Extensión, Vinculación y Territorio", "Secretaría General", "Secretaría Económica - Financiera", "Dirección TIC", "Personal de apoyo", "Decanato"];
 const organizerColors = new Map([
   ["Secretaría Académica", "#45A7D8"],
   ["Secretaría de Posgrado", "#00597B"],
@@ -25,7 +25,7 @@ const organizerColors = new Map([
   ["Secretaría General", "#7B0A22"],
   ["Secretaría Económica - Financiera", "#D0BC8E"],
   ["Dirección TIC", "#EFCE5B"],
-  ["Biblioteca", "#946984"],
+  ["Personal de apoyo", "#023764"],
   ["Decanato", "#023764"]
 ]);
 const organizerAliases = new Map([
@@ -84,7 +84,7 @@ function dateRangeLabel(item) {
   return `${formatDate(start, { day: "numeric", month: "long" })} al ${formatDate(end, { day: "numeric", month: "long", year: "numeric" })}`;
 }
 function organizerName(value) { return organizerAliases.get(value) || value || ""; }
-function organizerColor(value) { return organizerColors.get(organizerName(value)) || "#9AA8B2"; }
+function organizerColor(value) { return organizerColors.get(organizerName(value)) || "#023764"; }
 function platformAsset(value) { return platformAssets.find(({ test }) => test.test(String(value || ""))) || null; }
 function createPlatformIcon(platform) {
   const asset = platformAsset(platform);
@@ -144,7 +144,7 @@ function bindEvents() {
   el("date").addEventListener("change", updateWeekdayInput);
   el("endDate").addEventListener("change", updateDateRangeInputs);
   el("recurrence").addEventListener("change", toggleRecurrenceFields);
-  el("secretary").addEventListener("change", () => updateAcademicFields());
+  el("secretary").addEventListener("change", () => { toggleOtherSecretary(); updateAcademicFields(); });
   el("career").addEventListener("change", () => updateAcademicFields());
   el("classroom").addEventListener("change", toggleOtherClassroom);
   el("activityType").addEventListener("change", () => { if (el("activityType").value === "transmission" && !el("platform").value.trim()) el("platform").value = "YouTube"; });
@@ -161,7 +161,8 @@ function populateSelect(select, options, placeholder) {
 }
 
 function populateFormOptions() {
-  populateSelect(el("secretary"), secretaryOptions, "Seleccionar área organizadora");
+  populateSelect(el("secretary"), [...secretaryOptions, "__other__"], "Seleccionar área organizadora");
+  el("secretary").querySelector('option[value="__other__"]').textContent = "Otro (especificar)";
   populateSelect(el("career"), Object.keys(academicSubjects), "Seleccionar carrera");
   populateSelect(el("subject"), [], "Primero seleccioná una carrera");
   populateSelect(el("classroom"), [...classroomOptions, "__other__"], "Seleccionar aula o lugar");
@@ -182,6 +183,12 @@ function toggleOtherClassroom() {
   const other = el("classroom").value === "__other__";
   el("otherClassroomField").hidden = !other; el("otherClassroom").required = other;
   if (!other) el("otherClassroom").value = "";
+}
+
+function toggleOtherSecretary() {
+  const other = el("secretary").value === "__other__";
+  el("otherSecretaryField").hidden = !other; el("otherSecretary").required = other;
+  if (!other) el("otherSecretary").value = "";
 }
 
 function updateAuthUI() {
@@ -334,9 +341,8 @@ function createActivityRow(item) {
   const activityName = document.createElement("strong"); activityName.className = "summary-activity-name"; activityName.textContent = item.name;
   title.append(activityName);
   if (item.secretary) {
-    const separator = document.createElement("span"); separator.className = "summary-separator"; separator.textContent = "|";
     const organizer = document.createElement("span"); organizer.className = "summary-organizer"; organizer.textContent = organizerName(item.secretary); organizer.style.color = organizerColor(item.secretary);
-    title.append(separator, organizer);
+    title.append(organizer);
   }
   if (isTransmission(item)) { const badge = document.createElement("span"); badge.className = "transmission-badge"; badge.textContent = "Transmisión"; title.append(badge); }
   const meta = document.createElement("span"); meta.className = "summary-meta";
@@ -455,7 +461,11 @@ function openActivityForm(item = null) {
   el("recurrence").value = "none"; el("recurrence").disabled = Boolean(item?.id); el("recurrenceField").hidden = Boolean(item?.id);
   el("repeatUntil").value = toISODate(calendarEnd);
   const storedOrganizer = organizerName(item?.secretary);
-  el("name").value = item?.name || ""; el("secretary").value = secretaryOptions.includes(storedOrganizer) ? storedOrganizer : ""; el("responsible").value = item?.responsible || "";
+  el("name").value = item?.name || "";
+  if (secretaryOptions.includes(storedOrganizer)) { el("secretary").value = storedOrganizer; el("otherSecretary").value = ""; }
+  else if (storedOrganizer) { el("secretary").value = "__other__"; el("otherSecretary").value = storedOrganizer; }
+  else { el("secretary").value = ""; el("otherSecretary").value = ""; }
+  toggleOtherSecretary(); el("responsible").value = item?.responsible || "";
   el("activityType").value = isTransmission(item) ? "transmission" : "hybrid";
   const inferredCareer = item?.career || Object.keys(academicSubjects).find((career) => academicSubjects[career].includes(item?.subject)) || "";
   el("career").value = inferredCareer; updateAcademicFields(item?.subject || "");
@@ -483,8 +493,9 @@ function toggleRecurrenceFields() { const repeats = el("recurrence").value !== "
 
 function activityPayload() {
   const academic = el("secretary").value === academicSecretary;
+  const secretary = el("secretary").value === "__other__" ? el("otherSecretary").value.trim() : el("secretary").value;
   const classroom = el("classroom").value === "__other__" ? el("otherClassroom").value.trim() : el("classroom").value;
-  return { date: el("date").value, end_date: el("endDate").value, start_time: el("startTime").value, end_time: el("endTime").value, name: el("name").value.trim(), secretary: el("secretary").value, career: academic ? el("career").value : "", subject: academic ? el("subject").value : "", responsible: el("responsible").value.trim(), classroom, activity_type: el("activityType").value, platform: el("platform").value.trim(), account_used: el("accountUsed").value.trim(), meeting_url: el("meetingUrl").value.trim(), requirements: el("requirements").value.trim(), observations: "", recording_required: el("recordingRequired").checked };
+  return { date: el("date").value, end_date: el("endDate").value, start_time: el("startTime").value, end_time: el("endTime").value, name: el("name").value.trim(), secretary, career: academic ? el("career").value : "", subject: academic ? el("subject").value : "", responsible: el("responsible").value.trim(), classroom, activity_type: el("activityType").value, platform: el("platform").value.trim(), account_used: el("accountUsed").value.trim(), meeting_url: el("meetingUrl").value.trim(), requirements: el("requirements").value.trim(), observations: "", recording_required: el("recordingRequired").checked };
 }
 
 function validateActivity(payload) {
@@ -492,6 +503,7 @@ function validateActivity(payload) {
   if (fromISODate(payload.end_date) > calendarEnd) return "La actividad no puede finalizar después del 28 de diciembre de 2026.";
   if (fromISODate(payload.end_date) < fromISODate(payload.date)) return "La fecha de finalización no puede ser anterior a la fecha de inicio.";
   if (fromISODate(payload.date).getDay() === 0) return "Los domingos no forman parte de esta agenda.";
+  if (!payload.secretary) return "Seleccioná quién organiza o completá el campo Otro organizador.";
   if (!payload.classroom) return "Seleccioná un aula o completá el campo Otro lugar.";
   if (payload.secretary === academicSecretary && (!payload.career || !payload.subject)) return "Seleccioná la carrera y la materia.";
   if (payload.end_time <= payload.start_time) return "La hora de finalización debe ser posterior a la de inicio.";
