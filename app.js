@@ -15,14 +15,14 @@ const demoStorageKey = "agenda-hibrida-demo-firebase-v2";
 const calendarEnd = new Date(2026, 11, 28);
 const holidays = new Set(["2026-10-12", "2026-11-23", "2026-12-07", "2026-12-08"]);
 const classroomOptions = ["Aula A", "Aula B", "Aula C", "Aula D", "Aula E", "Aula F", "Aula G", "Aula H (Magnita)", "Aula I", "Aula J", "Aula K", "Aula L", "Aula M", "Laboratorio", "Aula Magna", "Consejo Directivo"];
-const secretaryOptions = ["Secretaría Académica", "Secretaría de Posgrado", "Secretaría de Investigación, Ciencia y Técnica", "Secretaría de Relaciones Estudiantiles y Egresados/as", "Secretaría de Extensión, Vinculación y Territorio", "Secretaría Administrativa", "Secretaría Económica - Financiera", "Dirección TIC", "Biblioteca", "Decanato"];
+const secretaryOptions = ["Secretaría Académica", "Secretaría de Posgrado", "Secretaría de Investigación, Ciencia y Técnica", "Secretaría de Relaciones Estudiantiles y Egresados/as", "Secretaría de Extensión, Vinculación y Territorio", "Secretaría General", "Secretaría Económica - Financiera", "Dirección TIC", "Biblioteca", "Decanato"];
 const organizerColors = new Map([
   ["Secretaría Académica", "#45A7D8"],
   ["Secretaría de Posgrado", "#00597B"],
   ["Secretaría de Investigación, Ciencia y Técnica", "#0396A6"],
   ["Secretaría de Relaciones Estudiantiles y Egresados/as", "#2E8B57"],
   ["Secretaría de Extensión, Vinculación y Territorio", "#D76D37"],
-  ["Secretaría Administrativa", "#7B0A22"],
+  ["Secretaría General", "#7B0A22"],
   ["Secretaría Económica - Financiera", "#D0BC8E"],
   ["Dirección TIC", "#EFCE5B"],
   ["Biblioteca", "#946984"],
@@ -31,6 +31,7 @@ const organizerColors = new Map([
 const organizerAliases = new Map([
   ["Secretaría de Extensión, Vinculación Y Territorio", "Secretaría de Extensión, Vinculación y Territorio"],
   ["Secretaría Económica-Financiera", "Secretaría Económica - Financiera"],
+  ["Secretaría Administrativa", "Secretaría General"],
   ["Decanato (Azul)", "Decanato"]
 ]);
 const platformAssets = [
