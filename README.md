@@ -32,6 +32,7 @@ El proyecto ya contiene la configuración del proyecto Firebase `agenda-hibridac
 - Listas desplegables institucionales para área organizadora y aula, con opción de indicar otro lugar.
 - El formulario de edición solo se cierra mediante los botones Cerrar o Cancelar, para evitar cierres accidentales.
 - Para Secretaría Académica: selección dependiente de carrera y materia, con la opción Ingreso disponible en ambas carreras.
+- En Abogacía, las materias de los primeros trayectos que se dictan en ambos turnos aparecen diferenciadas como `TM` (turno mañana) y `TT` (turno tarde).
 - Rango de fechas para actividades que duran varios días; se muestran cada día del período, excepto los domingos.
 - Actividades únicas, semanales o cada 15 días.
 - Importación inicial desde Google Calendar mediante `.ics`.
