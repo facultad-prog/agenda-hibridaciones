@@ -361,7 +361,7 @@ function createDetailsContent(item, includeEditorActions) {
   if (isTransmission(item)) fields.push(["Tipo", "Transmisión"]);
   if (item.career) fields.push(["Carrera", item.career]);
   if (item.subject) fields.push(["Materia", item.subject]);
-  fields.push(["Responsable / contacto", item.responsible], ["Aula", item.classroom], ["Plataforma", item.platform], ["Cuenta", item.account_used], ["Grabación", item.recording_required ? "Sí" : "No"], ["Requerimientos / observaciones", combinedNotes || "Sin indicaciones"]);
+  fields.push(["Responsable / contacto", item.responsible], ["Aula/Lugar", item.classroom], ["Plataforma", item.platform], ["Cuenta", item.account_used], ["Grabación", item.recording_required ? "Sí" : "No"], ["Requerimientos / observaciones", combinedNotes || "Sin indicaciones"]);
   fields.forEach(([label, value]) => {
     const block = document.createElement("div"); block.className = "detail-item";
     const labelNode = document.createElement("span"); labelNode.className = "detail-label"; labelNode.textContent = label;
