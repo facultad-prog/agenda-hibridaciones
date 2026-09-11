@@ -73,6 +73,7 @@ main { width: min(1180px, calc(100% - 32px)); margin: 0 auto; padding: 26px 0 56
 .summary-organizer { font-size: .75rem; font-weight: 700; }
 .transmission-badge { color: #a63838; font-size: .65rem; font-weight: 600; }
 .virtual-badge { color: var(--blue); font-size: .65rem; font-weight: 600; }
+.hybrid-badge { color: var(--blue); font-size: .65rem; font-weight: 600; }
 .summary-meta { min-width: 0; display: flex; align-items: center; justify-content: flex-end; gap: 9px; }
 .summary-room { color: var(--muted); font-size: .78rem; text-align: right; overflow-wrap: anywhere; }
 .platform-icon { width: 22px; height: 22px; flex: 0 0 22px; border-radius: 4px; object-fit: contain; background: white; }
@@ -111,6 +112,7 @@ main { width: min(1180px, calc(100% - 32px)); margin: 0 auto; padding: 26px 0 56
 .month-event strong { display: block; color: var(--blue); font-size: .64rem; }
 .month-transmission { display: block; color: #a63838; font-size: .55rem; font-weight: 600; }
 .month-virtual { display: block; color: var(--blue); font-size: .55rem; font-weight: 600; }
+.month-hybrid { display: block; color: var(--blue); font-size: .55rem; font-weight: 600; }
 .mobile-month-list { display: grid; gap: 11px; }
 .holiday-empty { margin: 0; padding: 11px 13px; border: 1px solid #efd1d1; border-radius: 6px; background: #fff8f8; color: #9b5555; font-size: .78rem; }
 

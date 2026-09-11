@@ -354,8 +354,8 @@ function createActivityRow(item) {
     const organizer = document.createElement("span"); organizer.className = "summary-organizer"; organizer.textContent = organizerName(item.secretary); organizer.style.color = organizerColor(item.secretary);
     title.append(organizer);
   }
-  if (isTransmission(item)) { const badge = document.createElement("span"); badge.className = "transmission-badge"; badge.textContent = "Transmisión"; title.append(badge); }
-  if (isVirtual(item)) { const badge = document.createElement("span"); badge.className = "virtual-badge"; badge.textContent = "Virtual"; title.append(badge); }
+  const activityType = isTransmission(item) ? "transmission" : isVirtual(item) ? "virtual" : "hybrid";
+  const badge = document.createElement("span"); badge.className = `${activityType}-badge`; badge.textContent = activityTypeLabel(item); title.append(badge);
   const meta = document.createElement("span"); meta.className = "summary-meta";
   if (!isVirtual(item)) { const room = document.createElement("span"); room.className = "summary-room"; room.textContent = item.classroom || "Lugar a confirmar"; meta.append(room); }
   const platformIcon = createPlatformIcon(item.platform); if (platformIcon) meta.append(platformIcon);
@@ -424,8 +424,8 @@ function renderMonth() {
     activitiesForDate(date).forEach((item) => {
       const button = document.createElement("button"); button.type = "button"; button.className = "month-event";
       if (isTransmission(item)) button.classList.add("transmission");
-      if (isTransmission(item)) { const badge = document.createElement("span"); badge.className = "month-transmission"; badge.textContent = "Transmisión"; button.append(badge); }
-      if (isVirtual(item)) { const badge = document.createElement("span"); badge.className = "month-virtual"; badge.textContent = "Virtual"; button.append(badge); }
+      const activityType = isTransmission(item) ? "transmission" : isVirtual(item) ? "virtual" : "hybrid";
+      const badge = document.createElement("span"); badge.className = `month-${activityType}`; badge.textContent = activityTypeLabel(item); button.append(badge);
       const time = document.createElement("strong"); time.textContent = cleanTime(item.start_time); button.append(time, document.createTextNode(item.name));
       button.addEventListener("click", () => openDetail(item)); cell.append(button);
     });
