@@ -9,7 +9,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="styles.css?v=11" />
+    <link rel="stylesheet" href="styles.css?v=16" />
   </head>
   <body>
     <header class="site-header">
@@ -82,13 +82,13 @@
           </label>
           <label id="repeatUntilField" hidden>Repetir hasta<input id="repeatUntil" type="date" max="2026-12-28" /></label>
           <label class="wide">Nombre de la actividad<input id="name" type="text" maxlength="160" required /></label>
-          <label>Tipo de actividad<select id="activityType" required><option value="hybrid">Hibridación</option><option value="transmission">Transmisión</option></select></label>
+          <label>Tipo de actividad<select id="activityType" required><option value="hybrid">Híbrida</option><option value="virtual">Virtual</option><option value="transmission">Transmisión</option></select></label>
           <label>Organiza<select id="secretary" required></select></label>
           <label id="otherSecretaryField" hidden>Otro organizador<input id="otherSecretary" type="text" maxlength="120" /></label>
           <label id="careerField" hidden>Carrera<select id="career"></select></label>
-          <label id="subjectField" class="wide" hidden>Materia<select id="subject"></select></label>
+          <label id="subjectField" class="wide" hidden>Materia / Ingreso<select id="subject"></select></label>
           <label>Responsable<input id="responsible" type="text" maxlength="100" required /></label>
-          <label>Aula/Lugar<select id="classroom" required></select></label>
+          <label id="classroomField">Aula/Lugar<select id="classroom" required></select></label>
           <label id="otherClassroomField" hidden>Otro lugar<input id="otherClassroom" type="text" maxlength="100" /></label>
           <label>Plataforma<input id="platform" type="text" list="platformOptions" maxlength="80" placeholder="Zoom, Google Meet…" /></label>
           <datalist id="platformOptions"><option value="Zoom"></option><option value="Google Meet"></option><option value="Microsoft Teams"></option><option value="YouTube"></option></datalist>
@@ -146,7 +146,7 @@
     <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
 
     <script src="config.js?v=11"></script>
-    <script type="module" src="app.js?v=15"></script>
+    <script type="module" src="app.js?v=16"></script>
     <script>
       window.setTimeout(function () {
         var message = document.getElementById("status");

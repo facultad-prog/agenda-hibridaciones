@@ -45,10 +45,10 @@ const lawCareer = "Abogacía";
 const buildingCareer = "Tecnicatura Universitaria en Administración de Edificios de Propiedad Horizontal y Conjuntos Inmobiliarios";
 const academicSubjects = {
   [lawCareer]: [
-    "Introducción a la Filosofía", "Problemática del Conocimiento", "Introducción al Derecho", "Derecho Romano", "Historia de las Instituciones Argentinas y Latinoamericanas", "Derecho Político", "Derecho Civil", "Inglés I", "Derecho Penal Parte General I", "Derecho Constitucional", "Principios de la Economía", "Derecho de las Obligaciones I", "Inglés II", "Práctica Profesional Supervisada I", "Derecho Penal Parte General II", "Finanzas Públicas y Derecho Tributario", "Derecho de las Obligaciones II", "Derecho del Consumidor y Defensa de la Competencia", "Inglés III", "Práctica Profesional Supervisada II", "Derecho Penal Parte Especial I", "Derecho Comercial y Societario I", "Contratos Civiles y Comerciales I", "Sociología del Derecho", "Práctica Profesional Supervisada III", "Derecho Penal Parte Especial II", "Derecho Comercial y Societario II", "Contratos Civiles y Comerciales II", "Filosofía del Derecho", "Mediación I", "Práctica Profesional Supervisada IV", "Derechos Reales I", "Títulos Valores", "Derecho del Trabajo y la Seguridad Social", "Derecho Procesal Civil y Comercial. Parte General", "Mediación II", "Práctica Profesional Supervisada V", "Derechos Reales II", "Derecho Procesal Civil y Comercial. Parte Especial", "Derecho Concursal", "Derecho de las Familias", "Derechos Humanos", "Metodología de la Investigación I", "Práctica Profesional Supervisada VI", "Derecho Sucesorio", "Derecho Administrativo I", "Derecho Procesal Penal I", "Derecho Internacional Público y de la Integración", "Mediación III", "Práctica Profesional Supervisada VII", "Derecho Administrativo II", "Derecho Procesal Penal II", "Derecho de los Recursos Naturales, Aguas y Protección del Medio Ambiente", "Derecho Internacional Privado", "Metodología de la Investigación II", "Práctica Profesional Supervisada VIII", "Derecho Público Provincial y Municipal", "Derecho de la Salud y Responsabilidad Médica", "Criminología", "Derecho del Transporte", "Derecho Electoral", "Derecho del Deporte", "Inteligencia Criminal y Crimen Organizado", "Derecho Aeronáutico", "Derecho Aduanero", "Derecho Procesal Constitucional", "Derecho Informático", "Análisis Económico del Derecho", "Derecho Bancario Bursátil y Seguros", "Propiedad Horizontal y Conjuntos Inmobiliarios", "Derecho Penal Económico", "Procedimientos y Procesos Administrativos Especiales", "Empresa Familiar", "Integración Regional", "Derecho de los Negocios Internacionales", "Derecho Notarial y Registral"
+    "Ingreso", "Introducción a la Filosofía", "Problemática del Conocimiento", "Introducción al Derecho", "Derecho Romano", "Historia de las Instituciones Argentinas y Latinoamericanas", "Derecho Político", "Derecho Civil", "Inglés I", "Derecho Penal Parte General I", "Derecho Constitucional", "Principios de la Economía", "Derecho de las Obligaciones I", "Inglés II", "Práctica Profesional Supervisada I", "Derecho Penal Parte General II", "Finanzas Públicas y Derecho Tributario", "Derecho de las Obligaciones II", "Derecho del Consumidor y Defensa de la Competencia", "Inglés III", "Práctica Profesional Supervisada II", "Derecho Penal Parte Especial I", "Derecho Comercial y Societario I", "Contratos Civiles y Comerciales I", "Sociología del Derecho", "Práctica Profesional Supervisada III", "Derecho Penal Parte Especial II", "Derecho Comercial y Societario II", "Contratos Civiles y Comerciales II", "Filosofía del Derecho", "Mediación I", "Práctica Profesional Supervisada IV", "Derechos Reales I", "Títulos Valores", "Derecho del Trabajo y la Seguridad Social", "Derecho Procesal Civil y Comercial. Parte General", "Mediación II", "Práctica Profesional Supervisada V", "Derechos Reales II", "Derecho Procesal Civil y Comercial. Parte Especial", "Derecho Concursal", "Derecho de las Familias", "Derechos Humanos", "Metodología de la Investigación I", "Práctica Profesional Supervisada VI", "Derecho Sucesorio", "Derecho Administrativo I", "Derecho Procesal Penal I", "Derecho Internacional Público y de la Integración", "Mediación III", "Práctica Profesional Supervisada VII", "Derecho Administrativo II", "Derecho Procesal Penal II", "Derecho de los Recursos Naturales, Aguas y Protección del Medio Ambiente", "Derecho Internacional Privado", "Metodología de la Investigación II", "Práctica Profesional Supervisada VIII", "Derecho Público Provincial y Municipal", "Derecho de la Salud y Responsabilidad Médica", "Criminología", "Derecho del Transporte", "Derecho Electoral", "Derecho del Deporte", "Inteligencia Criminal y Crimen Organizado", "Derecho Aeronáutico", "Derecho Aduanero", "Derecho Procesal Constitucional", "Derecho Informático", "Análisis Económico del Derecho", "Derecho Bancario Bursátil y Seguros", "Propiedad Horizontal y Conjuntos Inmobiliarios", "Derecho Penal Económico", "Procedimientos y Procesos Administrativos Especiales", "Empresa Familiar", "Integración Regional", "Derecho de los Negocios Internacionales", "Derecho Notarial y Registral"
   ],
   [buildingCareer]: [
-    "Introducción a la Comunicación", "Ética Profesional", "Inglés I", "Manejo de Utilitarios PC", "Introducciones Contables I", "Fundamentos del Derecho I", "Higiene y Seguridad", "Práctica Profesional I", "Problemática de la Comunicación", "Psicología Social", "Inglés II", "Introducciones Contables II", "Fundamentos del Derecho II", "Estructura Edilicia", "Práctica Profesional II", "Mediación, Negociación y Resolución de Conflictos", "Comercio vinculado a la Administración Edilicia", "Liquidación de Sueldos y Seguridad Social", "Obligaciones, Familia y Sucesiones", "Derechos Reales y Registral", "Propiedad Horizontal", "Comportamiento organizacional", "Práctica Profesional III", "Rendición de Cuentas y Régimen Impositivo", "Ordenamiento territorial, Ingeniería y Arquitectura", "Diseño y Proyectos Inmobiliarios", "Contratos", "Derecho Laboral", "Conjuntos Inmobiliarios", "Práctica Profesional IV", "Proyecto Final"
+    "Ingreso", "Introducción a la Comunicación", "Ética Profesional", "Inglés I", "Manejo de Utilitarios PC", "Introducciones Contables I", "Fundamentos del Derecho I", "Higiene y Seguridad", "Práctica Profesional I", "Problemática de la Comunicación", "Psicología Social", "Inglés II", "Introducciones Contables II", "Fundamentos del Derecho II", "Estructura Edilicia", "Práctica Profesional II", "Mediación, Negociación y Resolución de Conflictos", "Comercio vinculado a la Administración Edilicia", "Liquidación de Sueldos y Seguridad Social", "Obligaciones, Familia y Sucesiones", "Derechos Reales y Registral", "Propiedad Horizontal", "Comportamiento organizacional", "Práctica Profesional III", "Rendición de Cuentas y Régimen Impositivo", "Ordenamiento territorial, Ingeniería y Arquitectura", "Diseño y Proyectos Inmobiliarios", "Contratos", "Derecho Laboral", "Conjuntos Inmobiliarios", "Práctica Profesional IV", "Proyecto Final"
   ]
 };
 
@@ -73,6 +73,8 @@ function formatDate(date, options) { return new Intl.DateTimeFormat(locale, opti
 function cleanTime(value) { return (value || "").slice(0, 5); }
 function normalizeActivityName(value) { return String(value || "").trim().toLocaleLowerCase(locale); }
 function isTransmission(item) { return ["transmission", "transmisión", "transmision"].includes(String(item?.activity_type || "").trim().toLocaleLowerCase(locale)); }
+function isVirtual(item) { return String(item?.activity_type || "").trim().toLocaleLowerCase(locale) === "virtual"; }
+function activityTypeLabel(item) { return isTransmission(item) ? "Transmisión" : isVirtual(item) ? "Virtual" : "Híbrida"; }
 function isHoliday(date) { return holidays.has(toISODate(date)); }
 function isAfterCalendarEnd(date) { return localDate(date) > calendarEnd; }
 function sortActivities(a, b) { return `${a.date}${cleanTime(a.start_time)}${a.name}`.localeCompare(`${b.date}${cleanTime(b.start_time)}${b.name}`, locale); }
@@ -147,7 +149,7 @@ function bindEvents() {
   el("secretary").addEventListener("change", () => { toggleOtherSecretary(); updateAcademicFields(); });
   el("career").addEventListener("change", () => updateAcademicFields());
   el("classroom").addEventListener("change", toggleOtherClassroom);
-  el("activityType").addEventListener("change", () => { if (el("activityType").value === "transmission" && !el("platform").value.trim()) el("platform").value = "YouTube"; });
+  el("activityType").addEventListener("change", toggleActivityTypeFields);
   el("icsFile").addEventListener("change", () => { el("icsFileName").textContent = el("icsFile").files[0]?.name || "Ningún archivo seleccionado"; });
   document.querySelectorAll("[data-close]").forEach((button) => button.addEventListener("click", () => el(button.dataset.close).close()));
   [importDialog, detailDialog].forEach((dialog) => dialog.addEventListener("click", (event) => { if (event.target === dialog) dialog.close(); }));
@@ -175,14 +177,22 @@ function updateAcademicFields(preferredSubject = "") {
   el("career").required = academic; el("subject").required = academic;
   if (!academic) { el("career").value = ""; populateSelect(el("subject"), [], "Primero seleccioná una carrera"); return; }
   const subjects = academicSubjects[el("career").value] || [];
-  populateSelect(el("subject"), subjects, subjects.length ? "Seleccionar materia" : "Primero seleccioná una carrera");
+  populateSelect(el("subject"), subjects, subjects.length ? "Seleccionar materia o Ingreso" : "Primero seleccioná una carrera");
   if (subjects.includes(preferredSubject)) el("subject").value = preferredSubject;
 }
 
 function toggleOtherClassroom() {
-  const other = el("classroom").value === "__other__";
+  const other = el("activityType").value !== "virtual" && el("classroom").value === "__other__";
   el("otherClassroomField").hidden = !other; el("otherClassroom").required = other;
   if (!other) el("otherClassroom").value = "";
+}
+
+function toggleActivityTypeFields() {
+  const virtual = el("activityType").value === "virtual";
+  el("classroomField").hidden = virtual;
+  el("classroom").required = !virtual;
+  toggleOtherClassroom();
+  if (el("activityType").value === "transmission" && !el("platform").value.trim()) el("platform").value = "YouTube";
 }
 
 function toggleOtherSecretary() {
@@ -345,8 +355,9 @@ function createActivityRow(item) {
     title.append(organizer);
   }
   if (isTransmission(item)) { const badge = document.createElement("span"); badge.className = "transmission-badge"; badge.textContent = "Transmisión"; title.append(badge); }
+  if (isVirtual(item)) { const badge = document.createElement("span"); badge.className = "virtual-badge"; badge.textContent = "Virtual"; title.append(badge); }
   const meta = document.createElement("span"); meta.className = "summary-meta";
-  const room = document.createElement("span"); room.className = "summary-room"; room.textContent = item.classroom || "Lugar a confirmar"; meta.append(room);
+  if (!isVirtual(item)) { const room = document.createElement("span"); room.className = "summary-room"; room.textContent = item.classroom || "Lugar a confirmar"; meta.append(room); }
   const platformIcon = createPlatformIcon(item.platform); if (platformIcon) meta.append(platformIcon);
   const chevron = document.createElement("span"); chevron.className = "summary-chevron"; chevron.textContent = "⌄";
   summary.append(time, title, meta, chevron);
@@ -358,10 +369,12 @@ function createDetailsContent(item, includeEditorActions) {
   const wrapper = document.createElement("div"); const details = document.createElement("div"); details.className = "activity-details";
   const combinedNotes = [item.requirements, item.observations].filter(Boolean).join(" · ");
   const fields = [["Fechas", dateRangeLabel(item)], ["Organiza", organizerName(item.secretary)]];
-  if (isTransmission(item)) fields.push(["Tipo", "Transmisión"]);
+  fields.push(["Tipo", activityTypeLabel(item)]);
   if (item.career) fields.push(["Carrera", item.career]);
-  if (item.subject) fields.push(["Materia", item.subject]);
-  fields.push(["Responsable / contacto", item.responsible], ["Aula/Lugar", item.classroom], ["Plataforma", item.platform], ["Cuenta", item.account_used], ["Grabación", item.recording_required ? "Sí" : "No"], ["Requerimientos / observaciones", combinedNotes || "Sin indicaciones"]);
+  if (item.subject) fields.push(["Materia / Ingreso", item.subject]);
+  fields.push(["Responsable / contacto", item.responsible]);
+  if (!isVirtual(item)) fields.push(["Aula/Lugar", item.classroom]);
+  fields.push(["Plataforma", item.platform], ["Cuenta", item.account_used], ["Grabación", item.recording_required ? "Sí" : "No"], ["Requerimientos / observaciones", combinedNotes || "Sin indicaciones"]);
   fields.forEach(([label, value]) => {
     const block = document.createElement("div"); block.className = "detail-item";
     const labelNode = document.createElement("span"); labelNode.className = "detail-label"; labelNode.textContent = label;
@@ -412,6 +425,7 @@ function renderMonth() {
       const button = document.createElement("button"); button.type = "button"; button.className = "month-event";
       if (isTransmission(item)) button.classList.add("transmission");
       if (isTransmission(item)) { const badge = document.createElement("span"); badge.className = "month-transmission"; badge.textContent = "Transmisión"; button.append(badge); }
+      if (isVirtual(item)) { const badge = document.createElement("span"); badge.className = "month-virtual"; badge.textContent = "Virtual"; button.append(badge); }
       const time = document.createElement("strong"); time.textContent = cleanTime(item.start_time); button.append(time, document.createTextNode(item.name));
       button.addEventListener("click", () => openDetail(item)); cell.append(button);
     });
@@ -466,14 +480,14 @@ function openActivityForm(item = null) {
   else if (storedOrganizer) { el("secretary").value = "__other__"; el("otherSecretary").value = storedOrganizer; }
   else { el("secretary").value = ""; el("otherSecretary").value = ""; }
   toggleOtherSecretary(); el("responsible").value = item?.responsible || "";
-  el("activityType").value = isTransmission(item) ? "transmission" : "hybrid";
+  el("activityType").value = isTransmission(item) ? "transmission" : isVirtual(item) ? "virtual" : "hybrid";
   const inferredCareer = item?.career || Object.keys(academicSubjects).find((career) => academicSubjects[career].includes(item?.subject)) || "";
   el("career").value = inferredCareer; updateAcademicFields(item?.subject || "");
   const storedClassroom = item?.classroom === "Aula H" ? "Aula H (Magnita)" : item?.classroom || "";
   if (classroomOptions.includes(storedClassroom)) { el("classroom").value = storedClassroom; el("otherClassroom").value = ""; }
   else if (storedClassroom) { el("classroom").value = "__other__"; el("otherClassroom").value = storedClassroom; }
   else { el("classroom").value = ""; el("otherClassroom").value = ""; }
-  toggleOtherClassroom();
+  toggleActivityTypeFields();
   el("platform").value = item?.platform || ""; el("accountUsed").value = item?.account_used || ""; el("meetingUrl").value = item?.meeting_url || "";
   el("requirements").value = [item?.requirements, item?.observations].filter(Boolean).join(" · "); el("recordingRequired").checked = Boolean(item?.recording_required);
   updateWeekdayInput(); toggleRecurrenceFields(); activityDialog.showModal();
@@ -494,7 +508,7 @@ function toggleRecurrenceFields() { const repeats = el("recurrence").value !== "
 function activityPayload() {
   const academic = el("secretary").value === academicSecretary;
   const secretary = el("secretary").value === "__other__" ? el("otherSecretary").value.trim() : el("secretary").value;
-  const classroom = el("classroom").value === "__other__" ? el("otherClassroom").value.trim() : el("classroom").value;
+  const classroom = el("activityType").value === "virtual" ? "" : el("classroom").value === "__other__" ? el("otherClassroom").value.trim() : el("classroom").value;
   return { date: el("date").value, end_date: el("endDate").value, start_time: el("startTime").value, end_time: el("endTime").value, name: el("name").value.trim(), secretary, career: academic ? el("career").value : "", subject: academic ? el("subject").value : "", responsible: el("responsible").value.trim(), classroom, activity_type: el("activityType").value, platform: el("platform").value.trim(), account_used: el("accountUsed").value.trim(), meeting_url: el("meetingUrl").value.trim(), requirements: el("requirements").value.trim(), observations: "", recording_required: el("recordingRequired").checked };
 }
 
@@ -504,8 +518,8 @@ function validateActivity(payload) {
   if (fromISODate(payload.end_date) < fromISODate(payload.date)) return "La fecha de finalización no puede ser anterior a la fecha de inicio.";
   if (fromISODate(payload.date).getDay() === 0) return "Los domingos no forman parte de esta agenda.";
   if (!payload.secretary) return "Seleccioná quién organiza o completá el campo Otro organizador.";
-  if (!payload.classroom) return "Seleccioná un aula o completá el campo Otro lugar.";
-  if (payload.secretary === academicSecretary && (!payload.career || !payload.subject)) return "Seleccioná la carrera y la materia.";
+  if (payload.activity_type !== "virtual" && !payload.classroom) return "Seleccioná un aula o completá el campo Otro lugar.";
+  if (payload.secretary === academicSecretary && (!payload.career || !payload.subject)) return "Seleccioná la carrera y la materia o Ingreso.";
   if (payload.end_time <= payload.start_time) return "La hora de finalización debe ser posterior a la de inicio.";
   if (payload.meeting_url && !isSafeUrl(payload.meeting_url)) return "El enlace debe comenzar con http:// o https://.";
   if (el("recurrence").value !== "none" && fromISODate(el("repeatUntil").value) < fromISODate(payload.date)) return "La fecha final de repetición no puede ser anterior a la actividad.";
