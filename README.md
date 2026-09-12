@@ -1,6 +1,6 @@
-# Agenda de Hibridaciones y Transmisiones — Facultad de Derecho
+# Agenda de Actividades — Facultad de Derecho
 
-Aplicación web institucional para consultar y administrar las hibridaciones y transmisiones de la Facultad de Derecho.
+Aplicación web institucional para consultar y administrar las actividades presenciales, híbridas, virtuales y transmisiones de la Facultad de Derecho.
 
 ## Arquitectura elegida
 
@@ -22,11 +22,17 @@ El proyecto ya contiene la configuración del proyecto Firebase `agenda-hibridac
 - Feriados marcados: 12 de octubre, 23 de noviembre, 7 y 8 de diciembre.
 - Tarjetas compactas con horario, actividad, área organizadora identificada por color, aula y logo de plataforma; el resto se despliega.
 - El nombre del área organizadora aparece con su color institucional al desplegar una actividad.
-- Tipo de actividad seleccionable entre Híbrida, Virtual y Transmisión. Los tres tipos muestran un rótulo pequeño en azul `#023764`, ubicado sobre Aula/Lugar y la plataforma; las virtuales no solicitan ni muestran Aula/Lugar.
-- Filtro mediante casillas para mostrar u ocultar actividades híbridas, virtuales y transmisiones.
+- Modalidad seleccionable entre Presencial, Híbrida, Virtual y Transmisión. Las cuatro modalidades muestran un rótulo pequeño en azul `#023764`, ubicado sobre Aula/Lugar y la plataforma; las virtuales no solicitan ni muestran Aula/Lugar.
+- Filtro mediante casillas para mostrar u ocultar actividades presenciales, híbridas, virtuales y transmisiones.
+- Buscador por nombre de actividad, área organizadora, responsable, aula, plataforma, carrera, materia y observaciones.
+- Rótulo automático **▶ En curso** durante el horario de desarrollo de una actividad.
+- Tarjetas identificadas mediante una franja con el color correspondiente al área organizadora.
+- Campo público y opcional **Enlace para más información** en todas las actividades.
+- Carga diferenciada de **Períodos o fechas importantes** para inscripciones, reinscripciones e ingreso. Se muestran una sola vez en una sección compacta y no se repiten cada día.
+- Estados automáticos para los períodos: Próximamente, Período abierto, Últimos días y Finalizada. Los períodos finalizados se ocultan de la consulta pública.
 - Logo de YouTube para las transmisiones realizadas mediante esa plataforma.
 - Logos compactos de Google Meet, Microsoft Teams y Zoom.
-- Botones para abrir o copiar el enlace.
+- Cada enlace puede marcarse como público o privado. La consulta pública solo permite abrir y copiar los enlaces expresamente públicos; en los demás casos muestra **Link privado**.
 - Carga manual, edición, duplicación y eliminación.
 - Edición individual o conjunta de las actividades que tengan el mismo nombre y el mismo día de la semana.
 - Listas desplegables institucionales para área organizadora y aula, con opción de indicar otro lugar.
@@ -36,7 +42,7 @@ El proyecto ya contiene la configuración del proyecto Firebase `agenda-hibridac
 - Rango de fechas para actividades que duran varios días; se muestran cada día del período, excepto los domingos.
 - Actividades únicas, semanales o cada 15 días.
 - Importación inicial desde Google Calendar mediante `.ics`.
-- Campo de grabación.
+- Los datos **Cuenta** y **Grabación**, y los enlaces privados, se guardan en una colección protegida y solo son visibles para la cuenta editora.
 - Tipografía Montserrat, color `#014a7d` y logo institucional.
 
 ## Estructura
@@ -85,12 +91,23 @@ Este paso habilita el botón **Administrar agenda** en el sitio publicado.
 2. Presionar **Administrar agenda**.
 3. Ingresar con la cuenta `facultad@derecho.uncu.edu.ar`.
 4. Presionar **+ Cargar actividad**.
-5. Completar fecha de inicio, fecha de finalización, horario, actividad, tipo, área organizadora, responsable, aula, plataforma, cuenta, enlace, grabación y observaciones. Si dura un solo día, colocar la misma fecha en ambos campos.
-6. Si se elige **Secretaría Académica**, seleccionar también la carrera y la materia. Si el lugar no figura en la lista, elegir **Otro (especificar)**.
-7. En **Repetición**, elegir **No se repite**, **Todas las semanas** o **Cada 15 días**. Para una repetición, indicar hasta qué fecha debe generarse.
-8. Presionar **Guardar actividad**.
+5. En **Tipo de carga**, elegir **Actividad con fecha y horario**.
+6. Completar fecha de inicio, fecha de finalización, horario, actividad, modalidad, área organizadora, responsable, aula, plataforma, cuenta, enlace, grabación y observaciones. Si dura un solo día, colocar la misma fecha en ambos campos.
+7. Marcar **El enlace es público** solamente cuando cualquier persona que consulta la agenda pueda abrirlo. Si queda desmarcado, el enlace se guarda de forma privada.
+8. Si se elige **Secretaría Académica**, seleccionar también la carrera y la materia. Si el lugar no figura en la lista, elegir **Otro (especificar)**.
+9. En **Repetición**, elegir **No se repite**, **Todas las semanas** o **Cada 15 días**. Para una repetición, indicar hasta qué fecha debe generarse.
+10. Presionar **Guardar actividad**.
 
 No se edita ningún archivo para el uso cotidiano.
+
+## Cargar una fecha o período importante
+
+1. Ingresar como responsable y presionar **+ Cargar actividad**.
+2. En **Tipo de carga**, elegir **Período o fecha importante**.
+3. Completar la fecha de inicio y finalización, el título, el área organizadora, la descripción y, si existe, el enlace público de más información.
+4. Presionar **Guardar fecha importante**.
+
+Los períodos se muestran una sola vez en **Fechas importantes** y no se repiten en cada día de la agenda.
 
 ## Editar, duplicar o eliminar
 
@@ -133,6 +150,16 @@ https://USUARIO.github.io/agenda-hibrida-derecho/?demo=1
 
 Esta modalidad muestra tres actividades de ejemplo y permite probar carga, repetición, edición, duplicación y eliminación en ese navegador, sin modificar la base real.
 
+## Activar la protección de datos privados
+
+1. En Firebase, abrir **Firestore Database → Reglas**.
+2. Reemplazar el contenido por el archivo `firebase/firestore.rules` y presionar **Publicar**.
+3. Subir esta versión de la página a GitHub Pages.
+4. Ingresar a la agenda con la cuenta editora.
+5. Presionar una sola vez **Proteger datos anteriores** y confirmar.
+
+La migración mueve **Cuenta**, **Grabación** y los enlaces existentes a `actividades_privadas`. Por seguridad, todos los enlaces anteriores quedan privados; para publicar uno, editar la actividad y marcar **El enlace es público**.
+
 ## Seguridad
 
-La copia exacta de las reglas está en `firebase/firestore.rules`. Las reglas permiten la lectura pública de la colección `actividades` y solo permiten crear, modificar o eliminar cuando Firebase verifica el correo `facultad@derecho.uncu.edu.ar`.
+La copia exacta de las reglas está en `firebase/firestore.rules`. La colección `actividades` conserva únicamente la información pública. `actividades_privadas` solo admite lectura y escritura cuando Firebase verifica el correo `facultad@derecho.uncu.edu.ar`. Las reglas también impiden que Cuenta o Grabación se guarden accidentalmente en un documento público.

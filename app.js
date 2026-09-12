@@ -1,6 +1,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
 import { browserLocalPersistence, getAuth, GoogleAuthProvider, onAuthStateChanged, setPersistence, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-auth.js";
-import { addDoc, collection, deleteDoc, doc, getDocs, getFirestore, serverTimestamp, updateDoc, writeBatch } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js";
+import { collection, deleteField, doc, getDocs, getFirestore, serverTimestamp, writeBatch } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-firestore.js";
 
 const config = window.AGENDA_CONFIG || {};
 const demoMode = new URLSearchParams(location.search).has("demo");
@@ -10,6 +10,7 @@ const firebaseApp = configured ? initializeApp(config.firebaseConfig) : null;
 const db = configured ? getFirestore(firebaseApp) : null;
 const auth = configured ? getAuth(firebaseApp) : null;
 const activitiesCollection = "actividades";
+const privateActivitiesCollection = "actividades_privadas";
 const locale = "es-AR";
 const demoStorageKey = "agenda-hibrida-demo-firebase-v2";
 const calendarEnd = new Date(2026, 11, 28);
@@ -75,7 +76,7 @@ const academicSubjects = {
 };
 academicSubjects[lawCareer] = academicSubjects[lawCareer].flatMap((subject) => lawSubjectsWithShifts.has(subject) ? [`${subject} · TM`, `${subject} · TT`] : [subject]);
 
-const state = { view: "day", cursor: new Date(), activities: [], user: null, canEdit: !configured };
+const state = { view: "day", cursor: new Date(), activities: [], allActivities: [], showAllImportant: false, user: null, canEdit: !configured };
 const el = (id) => document.getElementById(id);
 const agenda = el("agenda");
 const status = el("status");
@@ -97,10 +98,30 @@ function cleanTime(value) { return (value || "").slice(0, 5); }
 function normalizeActivityName(value) { return String(value || "").trim().toLocaleLowerCase(locale); }
 function isTransmission(item) { return ["transmission", "transmisión", "transmision"].includes(String(item?.activity_type || "").trim().toLocaleLowerCase(locale)); }
 function isVirtual(item) { return String(item?.activity_type || "").trim().toLocaleLowerCase(locale) === "virtual"; }
-function activityTypeLabel(item) { return isTransmission(item) ? "Transmisión" : isVirtual(item) ? "Virtual" : "Híbrida"; }
-function activityTypeKey(item) { return isTransmission(item) ? "transmission" : isVirtual(item) ? "virtual" : "hybrid"; }
+function isPresential(item) { return ["presential", "presencial"].includes(String(item?.activity_type || "").trim().toLocaleLowerCase(locale)); }
+function activityTypeLabel(item) { return isTransmission(item) ? "Transmisión" : isVirtual(item) ? "Virtual" : isPresential(item) ? "Presencial" : "Híbrida"; }
+function activityTypeKey(item) { return isTransmission(item) ? "transmission" : isVirtual(item) ? "virtual" : isPresential(item) ? "presential" : "hybrid"; }
 function matchesTypeFilter(item) {
-  return { hybrid: el("filterHybrid").checked, virtual: el("filterVirtual").checked, transmission: el("filterTransmission").checked }[activityTypeKey(item)];
+  return { presential: el("filterPresential").checked, hybrid: el("filterHybrid").checked, virtual: el("filterVirtual").checked, transmission: el("filterTransmission").checked }[activityTypeKey(item)];
+}
+function normalizedSearch(value) { return String(value || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLocaleLowerCase(locale).trim(); }
+function matchesSearch(item) {
+  const query = normalizedSearch(el("searchActivities").value); if (!query) return true;
+  return normalizedSearch([item.name, item.secretary, item.responsible, item.classroom, item.platform, item.career, item.subject, item.requirements, item.observations].filter(Boolean).join(" ")).includes(query);
+}
+function minutesFromTime(value) { const [hours, minutes] = cleanTime(value).split(":").map(Number); return Number.isFinite(hours) && Number.isFinite(minutes) ? hours * 60 + minutes : -1; }
+function isInProgress(item, now = new Date()) {
+  const today = toISODate(now); if (today < item.date || today > activityEndDate(item)) return false;
+  const current = now.getHours() * 60 + now.getMinutes(); const start = minutesFromTime(item.start_time); const end = minutesFromTime(item.end_time);
+  return start >= 0 && end >= 0 && current >= start && current < end;
+}
+function isImportantPeriod(item) { return String(item?.record_kind || "").trim().toLocaleLowerCase(locale) === "period"; }
+function importantPeriodStatus(item) {
+  const today = toISODate(new Date());
+  if (today < item.date) return "Próximamente";
+  if (today > activityEndDate(item)) return "Finalizada";
+  const remaining = Math.round((fromISODate(activityEndDate(item)) - fromISODate(today)) / 86400000);
+  return remaining <= 2 ? "Últimos días" : "Período abierto";
 }
 function isHoliday(date) { return holidays.has(toISODate(date)); }
 function isAfterCalendarEnd(date) { return localDate(date) > calendarEnd; }
@@ -125,9 +146,10 @@ function createPlatformIcon(platform) {
 function demoRecords() {
   const monday = startOfWeek(new Date());
   return [
-    { id: "demo-1", date: toISODate(monday), end_date: toISODate(addDays(monday, 1)), start_time: "09:00", end_time: "11:00", name: "Jornada de actualización en Derecho Procesal", secretary: "Secretaría de Posgrado", responsible: "Mariana López", classroom: "Aula Magna", requirements: "Dos micrófonos, cámara fija y presentación. Realizar prueba técnica 30 minutos antes.", meeting_url: "https://meet.google.com/", platform: "Google Meet", account_used: "Cuenta institucional Posgrado", recording_required: true, observations: "" },
-    { id: "demo-2", date: toISODate(addDays(monday, 1)), end_date: toISODate(addDays(monday, 1)), start_time: "16:00", end_time: "18:00", name: "Clase híbrida de Derecho Constitucional", secretary: "Secretaría Académica", career: lawCareer, subject: "Derecho Constitucional", responsible: "Lucas Fernández", classroom: "Aula H (Magnita)", requirements: "Notebook, proyector y audio bidireccional.", meeting_url: "https://zoom.us/", platform: "Zoom", account_used: "Licencia Zoom Facultad", recording_required: true, observations: "" },
-    { id: "demo-3", date: toISODate(addDays(monday, 3)), end_date: toISODate(addDays(monday, 3)), start_time: "10:30", end_time: "12:00", name: "Sesión del Consejo Directivo", secretary: "Decanato", responsible: "Sofía Martínez", classroom: "Consejo Directivo", activity_type: "transmission", requirements: "Verificar audio y transmisión 30 minutos antes.", meeting_url: "https://www.youtube.com/", platform: "YouTube", account_used: "Canal institucional", recording_required: true, observations: "" }
+    { id: "demo-1", date: toISODate(monday), end_date: toISODate(addDays(monday, 1)), start_time: "09:00", end_time: "11:00", name: "Jornada de actualización en Derecho Procesal", secretary: "Secretaría de Posgrado", responsible: "Mariana López", classroom: "Aula Magna", requirements: "Dos micrófonos, cámara fija y presentación. Realizar prueba técnica 30 minutos antes.", meeting_url: "https://meet.google.com/", link_is_public: false, platform: "Google Meet", account_used: "Cuenta institucional Posgrado", recording_required: true, observations: "" },
+    { id: "demo-2", date: toISODate(addDays(monday, 1)), end_date: toISODate(addDays(monday, 1)), start_time: "16:00", end_time: "18:00", name: "Clase híbrida de Derecho Constitucional", secretary: "Secretaría Académica", career: lawCareer, subject: "Derecho Constitucional", responsible: "Lucas Fernández", classroom: "Aula H (Magnita)", requirements: "Notebook, proyector y audio bidireccional.", meeting_url: "https://zoom.us/", link_is_public: true, platform: "Zoom", account_used: "Licencia Zoom Facultad", recording_required: true, observations: "" },
+    { id: "demo-3", date: toISODate(addDays(monday, 3)), end_date: toISODate(addDays(monday, 3)), start_time: "10:30", end_time: "12:00", name: "Sesión del Consejo Directivo", secretary: "Decanato", responsible: "Sofía Martínez", classroom: "Consejo Directivo", activity_type: "transmission", requirements: "Verificar audio y transmisión 30 minutos antes.", meeting_url: "https://www.youtube.com/", link_is_public: true, platform: "YouTube", account_used: "Canal institucional", recording_required: true, observations: "" },
+    { id: "demo-4", record_kind: "period", date: toISODate(monday), end_date: toISODate(addDays(monday, 12)), start_time: "", end_time: "", name: "Inscripción a mesas de exámenes", secretary: "Secretaría Académica", responsible: "", classroom: "", requirements: "Consultá el cronograma y realizá la inscripción dentro del período indicado.", more_info_url: "https://www.uncuyo.edu.ar/", meeting_url: "", link_is_public: false, platform: "", account_used: "", recording_required: false, observations: "" }
   ].filter((item) => fromISODate(item.date) <= calendarEnd);
 }
 
@@ -166,6 +188,7 @@ function bindEvents() {
   el("nextPeriod").addEventListener("click", () => movePeriod(1));
   el("currentPeriod").addEventListener("click", () => { state.cursor = new Date(); loadPeriod(); });
   el("newActivity").addEventListener("click", () => openActivityForm());
+  el("migratePrivacy").addEventListener("click", migrateLegacyPrivateData);
   el("importCalendar").addEventListener("click", openImportForm);
   el("authButton").addEventListener("click", handleAuthButton);
   el("activityForm").addEventListener("submit", saveActivity);
@@ -177,11 +200,14 @@ function bindEvents() {
   el("career").addEventListener("change", () => updateAcademicFields());
   el("classroom").addEventListener("change", toggleOtherClassroom);
   el("activityType").addEventListener("change", toggleActivityTypeFields);
+  el("recordKind").addEventListener("change", toggleRecordKindFields);
   document.querySelectorAll("[data-type-filter]").forEach((input) => input.addEventListener("change", render));
+  el("searchActivities").addEventListener("input", render);
   el("icsFile").addEventListener("change", () => { el("icsFileName").textContent = el("icsFile").files[0]?.name || "Ningún archivo seleccionado"; });
   document.querySelectorAll("[data-close]").forEach((button) => button.addEventListener("click", () => el(button.dataset.close).close()));
   [importDialog, detailDialog].forEach((dialog) => dialog.addEventListener("click", (event) => { if (event.target === dialog) dialog.close(); }));
   activityDialog.addEventListener("cancel", (event) => event.preventDefault());
+  setInterval(() => { if (!document.hidden) render(); }, 60000);
 }
 
 function populateSelect(select, options, placeholder) {
@@ -200,7 +226,7 @@ function populateFormOptions() {
 }
 
 function updateAcademicFields(preferredSubject = "") {
-  const academic = el("secretary").value === academicSecretary;
+  const academic = el("recordKind").value === "activity" && el("secretary").value === academicSecretary;
   el("careerField").hidden = !academic; el("subjectField").hidden = !academic;
   el("career").required = academic; el("subject").required = academic;
   if (!academic) { el("career").value = ""; populateSelect(el("subject"), [], "Primero seleccioná una carrera"); return; }
@@ -210,17 +236,31 @@ function updateAcademicFields(preferredSubject = "") {
 }
 
 function toggleOtherClassroom() {
-  const other = el("activityType").value !== "virtual" && el("classroom").value === "__other__";
+  const other = el("recordKind").value === "activity" && el("activityType").value !== "virtual" && el("classroom").value === "__other__";
   el("otherClassroomField").hidden = !other; el("otherClassroom").required = other;
   if (!other) el("otherClassroom").value = "";
 }
 
 function toggleActivityTypeFields() {
-  const virtual = el("activityType").value === "virtual";
-  el("classroomField").hidden = virtual;
-  el("classroom").required = !virtual;
+  const scheduled = el("recordKind").value === "activity"; const virtual = el("activityType").value === "virtual";
+  el("classroomField").hidden = !scheduled || virtual;
+  el("classroom").required = scheduled && !virtual;
   toggleOtherClassroom();
   if (el("activityType").value === "transmission" && !el("platform").value.trim()) el("platform").value = "YouTube";
+}
+
+function toggleRecordKindFields() {
+  const scheduled = el("recordKind").value === "activity"; const editing = Boolean(el("activityId").value);
+  document.querySelectorAll("[data-scheduled-only]").forEach((node) => { node.hidden = !scheduled; });
+  el("startTime").required = scheduled; el("endTime").required = scheduled; el("activityType").required = scheduled; el("responsible").required = scheduled;
+  el("recurrenceField").hidden = !scheduled || editing;
+  el("recurrence").disabled = editing || !scheduled;
+  if (!scheduled) { el("recurrence").value = "none"; el("updateSameName").checked = false; }
+  el("bulkEditField").hidden = !scheduled || !editing;
+  el("requirementsLabel").textContent = scheduled ? "Requerimientos / observaciones" : "Descripción / información importante";
+  el("formTitle").textContent = editing ? (scheduled ? "Editar actividad" : "Editar fecha importante") : (scheduled ? "Nueva actividad" : "Nueva fecha importante");
+  el("saveActivity").textContent = scheduled ? "Guardar actividad" : "Guardar fecha importante";
+  toggleRecurrenceFields(); updateAcademicFields(el("subject").value); toggleActivityTypeFields();
 }
 
 function toggleOtherSecretary() {
@@ -304,9 +344,17 @@ async function loadPeriod() {
   try {
     if (configured) {
       const snapshot = await getDocs(collection(db, activitiesCollection));
-      state.activities = snapshot.docs.map((record) => ({ id: record.id, ...record.data() })).filter((item) => overlapsPeriod(item, start, end)).sort(sortActivities);
+      let records = snapshot.docs.map((record) => ({ id: record.id, ...record.data() }));
+      if (state.canEdit) {
+        const privateSnapshot = await getDocs(collection(db, privateActivitiesCollection));
+        const privateById = new Map(privateSnapshot.docs.map((record) => [record.id, record.data()]));
+        records = records.map((record) => ({ ...record, ...(privateById.get(record.id) || {}) }));
+      }
+      state.allActivities = records.sort(sortActivities);
+      state.activities = records.filter((item) => overlapsPeriod(item, start, end)).sort(sortActivities);
     } else {
-      state.activities = loadDemoData().filter((item) => overlapsPeriod(item, start, end)).sort(sortActivities);
+      const records = loadDemoData().sort(sortActivities); state.allActivities = records;
+      state.activities = records.filter((item) => overlapsPeriod(item, start, end)).sort(sortActivities);
     }
   } catch (error) {
     status.textContent = `No se pudo cargar la agenda. ${friendlyError(error)}`; return;
@@ -329,10 +377,48 @@ function updatePeriodTitle() {
 }
 
 function render() {
+  renderImportantPeriods();
   agenda.replaceChildren(); if (state.view === "day") renderDay(); else if (state.view === "week") renderWeek(); else renderMonth();
   const { visibleStart, visibleEnd } = periodRange();
-  const count = state.activities.filter((item) => overlapsPeriod(item, visibleStart, visibleEnd) && matchesTypeFilter(item)).length;
+  const count = state.activities.filter((item) => !isImportantPeriod(item) && overlapsPeriod(item, visibleStart, visibleEnd) && matchesTypeFilter(item) && matchesSearch(item)).length;
   status.textContent = `${count} ${count === 1 ? "actividad" : "actividades"}`;
+}
+
+function renderImportantPeriods() {
+  const root = el("importantPeriods"); root.replaceChildren();
+  const today = toISODate(new Date());
+  const all = state.allActivities.filter((item) => isImportantPeriod(item) && matchesSearch(item)).sort((a, b) => a.date.localeCompare(b.date));
+  const current = all.filter((item) => activityEndDate(item) >= today);
+  const past = all.filter((item) => activityEndDate(item) < today).sort((a, b) => b.date.localeCompare(a.date));
+  const available = state.canEdit && state.showAllImportant ? [...current, ...past] : current.length ? current : state.canEdit ? past.slice(0, 3) : [];
+  if (!available.length) { root.hidden = true; return; }
+  root.hidden = false;
+  const header = document.createElement("div"); header.className = "important-header";
+  const heading = document.createElement("div"); const eyebrow = document.createElement("p"); eyebrow.className = "eyebrow"; eyebrow.textContent = "Información institucional";
+  const title = document.createElement("h2"); title.textContent = "Fechas importantes"; heading.append(eyebrow, title); header.append(heading);
+  const limit = state.showAllImportant ? available.length : 3; const visible = available.slice(0, limit);
+  const canToggle = current.length > 3 || (state.canEdit && all.length > current.length);
+  if (canToggle) {
+    const toggle = document.createElement("button"); toggle.type = "button"; toggle.className = "button button-secondary important-toggle"; toggle.textContent = state.showAllImportant ? "Ver menos" : "Ver todas";
+    toggle.addEventListener("click", () => { state.showAllImportant = !state.showAllImportant; renderImportantPeriods(); }); header.append(toggle);
+  }
+  const cards = document.createElement("div"); cards.className = "important-cards"; visible.forEach((item) => cards.append(createImportantPeriodCard(item)));
+  root.append(header, cards);
+}
+
+function createImportantPeriodCard(item) {
+  const card = document.createElement("details"); card.className = "important-card"; card.style.setProperty("--organizer-color", organizerColor(item.secretary));
+  const summary = document.createElement("summary");
+  const content = document.createElement("span"); content.className = "important-card-title";
+  const title = document.createElement("strong"); title.textContent = item.name;
+  const organizer = document.createElement("span"); organizer.textContent = organizerName(item.secretary); organizer.style.color = organizerColor(item.secretary); content.append(title, organizer);
+  const meta = document.createElement("span"); meta.className = "important-card-meta";
+  const dates = document.createElement("span"); dates.textContent = dateRangeLabel(item);
+  const statusBadge = document.createElement("span"); statusBadge.className = "period-status"; statusBadge.textContent = importantPeriodStatus(item); meta.append(dates, statusBadge);
+  const chevron = document.createElement("span"); chevron.className = "summary-chevron"; chevron.textContent = "⌄";
+  summary.append(content, meta, chevron);
+  const expanded = document.createElement("div"); expanded.className = "important-expanded"; expanded.append(createDetailsContent(item, true));
+  card.append(summary, expanded); return card;
 }
 
 function isToday(date) { return toISODate(date) === toISODate(new Date()); }
@@ -371,10 +457,11 @@ function createDayHeading(date) {
 
 function createActivityRow(item) {
   const details = document.createElement("details"); details.className = "activity-row";
+  details.style.setProperty("--organizer-color", organizerColor(item.secretary));
   if (isTransmission(item)) details.classList.add("transmission");
   const summary = document.createElement("summary"); summary.className = "activity-summary";
   const time = document.createElement("span"); time.className = "summary-time"; time.textContent = `${cleanTime(item.start_time)}–${cleanTime(item.end_time)}`;
-  if (item.recording_required) { const dot = document.createElement("i"); dot.className = "recording-dot"; dot.title = "Requiere grabación"; time.append(dot); }
+  if (state.canEdit && item.recording_required) { const dot = document.createElement("i"); dot.className = "recording-dot"; dot.title = "Requiere grabación"; time.append(dot); }
   const title = document.createElement("span"); title.className = "summary-title";
   const activityName = document.createElement("strong"); activityName.className = "summary-activity-name"; activityName.textContent = item.name;
   title.append(activityName);
@@ -383,11 +470,13 @@ function createActivityRow(item) {
     title.append(organizer);
   }
   const meta = document.createElement("span"); meta.className = "summary-meta";
-  const type = document.createElement("span"); type.className = "summary-type"; type.textContent = activityTypeLabel(item);
+  const labels = document.createElement("span"); labels.className = "summary-labels";
+  const type = document.createElement("span"); type.className = "summary-type"; type.textContent = activityTypeLabel(item); labels.append(type);
+  if (isInProgress(item)) { const live = document.createElement("span"); live.className = "in-progress-badge"; live.textContent = "▶ En curso"; labels.append(live); }
   const placePlatform = document.createElement("span"); placePlatform.className = "summary-place-platform";
   if (!isVirtual(item)) { const room = document.createElement("span"); room.className = "summary-room"; room.textContent = item.classroom || "Lugar a confirmar"; placePlatform.append(room); }
   const platformIcon = createPlatformIcon(item.platform); if (platformIcon) placePlatform.append(platformIcon);
-  meta.append(type, placePlatform);
+  meta.append(labels, placePlatform);
   const chevron = document.createElement("span"); chevron.className = "summary-chevron"; chevron.textContent = "⌄";
   summary.append(time, title, meta, chevron);
   const expanded = document.createElement("div"); expanded.className = "activity-expanded"; expanded.append(createDetailsContent(item, true));
@@ -398,30 +487,51 @@ function createDetailsContent(item, includeEditorActions) {
   const wrapper = document.createElement("div"); const details = document.createElement("div"); details.className = "activity-details";
   const combinedNotes = [item.requirements, item.observations].filter(Boolean).join(" · ");
   const fields = [["Fechas", dateRangeLabel(item)], ["Organiza", organizerName(item.secretary)]];
-  if (item.career) fields.push(["Carrera", item.career]);
-  if (item.subject) fields.push(["Materia / Ingreso", item.subject]);
-  fields.push(["Responsable / contacto", item.responsible]);
-  if (!isVirtual(item)) fields.push(["Aula/Lugar", item.classroom]);
-  fields.push(["Tipo", activityTypeLabel(item)], ["Plataforma", item.platform], ["Cuenta", item.account_used], ["Grabación", item.recording_required ? "Sí" : "No"], ["Requerimientos / observaciones", combinedNotes || "Sin indicaciones"]);
+  if (!isImportantPeriod(item)) {
+    if (item.career) fields.push(["Carrera", item.career]);
+    if (item.subject) fields.push(["Materia / Ingreso", item.subject]);
+    fields.push(["Responsable / contacto", item.responsible]);
+    if (!isVirtual(item)) fields.push(["Aula/Lugar", item.classroom]);
+    if (isInProgress(item)) fields.push(["Estado", "▶ En curso"]);
+    fields.push(["Modalidad", activityTypeLabel(item)], ["Plataforma", item.platform]);
+    if (state.canEdit) fields.push(["Cuenta", item.account_used], ["Grabación", item.recording_required ? "Sí" : "No"]);
+  }
+  fields.push(["Requerimientos / observaciones", combinedNotes || "Sin indicaciones"]);
   fields.forEach(([label, value]) => {
     const block = document.createElement("div"); block.className = "detail-item";
     const labelNode = document.createElement("span"); labelNode.className = "detail-label"; labelNode.textContent = label;
     const valueNode = document.createElement("span"); valueNode.className = "detail-value";
     if (label === "Organiza") { valueNode.classList.add("organizer-value"); valueNode.style.color = organizerColor(item.secretary); }
-    if (label === "Tipo") valueNode.classList.add("activity-type-value");
+    if (label === "Modalidad") valueNode.classList.add("activity-type-value");
+    if (label === "Estado") valueNode.classList.add("activity-type-value");
     if (label === "Plataforma") { const icon = createPlatformIcon(item.platform); if (icon) valueNode.append(icon); }
     if (label === "Grabación" && item.recording_required) { const dot = document.createElement("i"); dot.className = "recording-dot detail-recording-dot"; dot.title = "Requiere grabación"; valueNode.append(dot); }
     valueNode.append(document.createTextNode(value || "—"));
     block.append(labelNode, valueNode); details.append(block);
   });
   wrapper.append(details);
-  if (isSafeUrl(item.meeting_url)) {
+  const publicLink = item.link_is_public === true;
+  const canOpenLink = isSafeUrl(item.meeting_url) && (state.canEdit || publicLink);
+  if (!isImportantPeriod(item) && canOpenLink) {
     const meeting = document.createElement("section"); meeting.className = "meeting-section";
     const heading = document.createElement("h3"); heading.textContent = isTransmission(item) ? "Ver transmisión" : "Unirse a la reunión"; meeting.append(heading);
+    if (!publicLink) { const notice = document.createElement("p"); notice.className = "private-link"; notice.textContent = "Link privado · visible solo para edición"; meeting.append(notice); }
     const actions = document.createElement("div"); actions.className = "link-actions";
     const open = document.createElement("a"); open.className = "link-button primary"; open.href = item.meeting_url; open.target = "_blank"; open.rel = "noopener noreferrer"; open.textContent = isTransmission(item) ? "Abrir transmisión ↗" : "Abrir reunión ↗";
     const copy = document.createElement("button"); copy.className = "link-button"; copy.type = "button"; copy.textContent = "Copiar enlace"; copy.addEventListener("click", () => copyLink(item.meeting_url));
     actions.append(open, copy); meeting.append(actions); wrapper.append(meeting);
+  } else if (!isImportantPeriod(item) && !publicLink) {
+    const meeting = document.createElement("section"); meeting.className = "meeting-section";
+    const heading = document.createElement("h3"); heading.textContent = "Enlace de acceso";
+    const notice = document.createElement("p"); notice.className = "private-link"; notice.textContent = "Link privado";
+    meeting.append(heading, notice); wrapper.append(meeting);
+  }
+  if (isSafeUrl(item.more_info_url)) {
+    const information = document.createElement("section"); information.className = "meeting-section information-section";
+    const heading = document.createElement("h3"); heading.textContent = "Más información";
+    const actions = document.createElement("div"); actions.className = "link-actions";
+    const open = document.createElement("a"); open.className = "link-button"; open.href = item.more_info_url; open.target = "_blank"; open.rel = "noopener noreferrer"; open.textContent = "Abrir información ↗";
+    actions.append(open); information.append(heading, actions); wrapper.append(information);
   }
   if (includeEditorActions && state.canEdit) {
     const actions = document.createElement("div"); actions.className = "card-actions editor-only";
@@ -434,7 +544,7 @@ function createDetailsContent(item, includeEditorActions) {
 function actionButton(label, handler, className = "") { const button = document.createElement("button"); button.type = "button"; button.textContent = label; button.className = className; button.addEventListener("click", handler); return button; }
 function activitiesForDate(date) {
   const key = toISODate(date);
-  return state.activities.filter((item) => item.date <= key && activityEndDate(item) >= key && matchesTypeFilter(item)).sort(sortActivities);
+  return state.activities.filter((item) => !isImportantPeriod(item) && item.date <= key && activityEndDate(item) >= key && matchesTypeFilter(item) && matchesSearch(item)).sort(sortActivities);
 }
 
 function renderMonth() {
@@ -452,9 +562,11 @@ function renderMonth() {
     if (isHoliday(date)) { const badge = document.createElement("span"); badge.className = "month-holiday"; badge.textContent = "Feriado"; cell.append(badge); }
     activitiesForDate(date).forEach((item) => {
       const button = document.createElement("button"); button.type = "button"; button.className = "month-event";
+      button.style.borderLeftColor = organizerColor(item.secretary);
       if (isTransmission(item)) button.classList.add("transmission");
       const activityType = activityTypeKey(item);
       const badge = document.createElement("span"); badge.className = `month-${activityType}`; badge.textContent = activityTypeLabel(item); button.append(badge);
+      if (isInProgress(item)) { const live = document.createElement("span"); live.className = "month-in-progress"; live.textContent = "▶ En curso"; button.append(live); }
       const time = document.createElement("strong"); time.textContent = cleanTime(item.start_time); button.append(time, document.createTextNode(item.name));
       button.addEventListener("click", () => openDetail(item)); cell.append(button);
     });
@@ -495,9 +607,10 @@ function isSafeUrl(value) { if (!value) return false; try { return ["https:", "h
 function openActivityForm(item = null) {
   if (!state.canEdit) return; if (detailDialog.open) detailDialog.close();
   const editing = Boolean(item?.id);
-  el("activityForm").reset(); el("formError").hidden = true; el("activityId").value = item?.id || ""; el("originalActivityName").value = item?.name || ""; el("formTitle").textContent = editing ? "Editar actividad" : item ? "Duplicar actividad" : "Nueva actividad";
+  el("activityForm").reset(); el("formError").hidden = true; el("activityId").value = item?.id || ""; el("originalActivityName").value = item?.name || "";
+  el("recordKind").value = isImportantPeriod(item) ? "period" : "activity";
   el("originalActivityDate").value = item?.date || "";
-  el("bulkEditField").hidden = !item?.id; el("updateSameName").checked = false;
+  el("bulkEditField").hidden = !item?.id || isImportantPeriod(item); el("updateSameName").checked = false;
   const { start, end } = periodRange(); const today = localDate(new Date()); const defaultDate = today >= start && today <= end ? today : start;
   el("date").value = item?.date || toISODate(defaultDate); el("endDate").value = item?.end_date || item?.date || toISODate(defaultDate);
   el("startTime").value = cleanTime(item?.start_time) || "09:00"; el("endTime").value = cleanTime(item?.end_time) || "10:00";
@@ -509,7 +622,7 @@ function openActivityForm(item = null) {
   else if (storedOrganizer) { el("secretary").value = "__other__"; el("otherSecretary").value = storedOrganizer; }
   else { el("secretary").value = ""; el("otherSecretary").value = ""; }
   toggleOtherSecretary(); el("responsible").value = item?.responsible || "";
-  el("activityType").value = isTransmission(item) ? "transmission" : isVirtual(item) ? "virtual" : "hybrid";
+  el("activityType").value = item ? (isTransmission(item) ? "transmission" : isVirtual(item) ? "virtual" : isPresential(item) ? "presential" : "hybrid") : "presential";
   const inferredCareer = item?.career || Object.keys(academicSubjects).find((career) => academicSubjects[career].includes(item?.subject)) || "";
   el("career").value = inferredCareer; updateAcademicFields(item?.subject || "");
   const storedClassroom = item?.classroom === "Aula H" ? "Aula H (Magnita)" : item?.classroom || "";
@@ -517,9 +630,9 @@ function openActivityForm(item = null) {
   else if (storedClassroom) { el("classroom").value = "__other__"; el("otherClassroom").value = storedClassroom; }
   else { el("classroom").value = ""; el("otherClassroom").value = ""; }
   toggleActivityTypeFields();
-  el("platform").value = item?.platform || ""; el("accountUsed").value = item?.account_used || ""; el("meetingUrl").value = item?.meeting_url || "";
+  el("platform").value = item?.platform || ""; el("accountUsed").value = item?.account_used || ""; el("meetingUrl").value = item?.meeting_url || ""; el("publicLink").checked = item?.link_is_public === true; el("moreInfoUrl").value = item?.more_info_url || "";
   el("requirements").value = [item?.requirements, item?.observations].filter(Boolean).join(" · "); el("recordingRequired").checked = Boolean(item?.recording_required);
-  updateWeekdayInput(); toggleRecurrenceFields(); activityDialog.showModal();
+  updateWeekdayInput(); toggleRecordKindFields(); activityDialog.showModal();
 }
 
 function updateWeekdayInput() {
@@ -532,30 +645,38 @@ function updateWeekdayInput() {
 function updateDateRangeInputs() {
   if (el("endDate").value < el("date").value) el("endDate").value = el("date").value;
 }
-function toggleRecurrenceFields() { const repeats = el("recurrence").value !== "none"; el("repeatUntilField").hidden = !repeats; el("repeatUntil").required = repeats; }
+function toggleRecurrenceFields() { const repeats = el("recordKind").value === "activity" && el("recurrence").value !== "none"; el("repeatUntilField").hidden = !repeats; el("repeatUntil").required = repeats; }
 
 function activityPayload() {
   const academic = el("secretary").value === academicSecretary;
   const secretary = el("secretary").value === "__other__" ? el("otherSecretary").value.trim() : el("secretary").value;
+  const recordKind = el("recordKind").value;
+  if (recordKind === "period") {
+    return { record_kind: "period", date: el("date").value, end_date: el("endDate").value, start_time: "", end_time: "", name: el("name").value.trim(), secretary, career: "", subject: "", responsible: "", classroom: "", activity_type: "", platform: "", account_used: "", meeting_url: "", link_is_public: false, more_info_url: el("moreInfoUrl").value.trim(), requirements: el("requirements").value.trim(), observations: "", recording_required: false };
+  }
   const classroom = el("activityType").value === "virtual" ? "" : el("classroom").value === "__other__" ? el("otherClassroom").value.trim() : el("classroom").value;
-  return { date: el("date").value, end_date: el("endDate").value, start_time: el("startTime").value, end_time: el("endTime").value, name: el("name").value.trim(), secretary, career: academic ? el("career").value : "", subject: academic ? el("subject").value : "", responsible: el("responsible").value.trim(), classroom, activity_type: el("activityType").value, platform: el("platform").value.trim(), account_used: el("accountUsed").value.trim(), meeting_url: el("meetingUrl").value.trim(), requirements: el("requirements").value.trim(), observations: "", recording_required: el("recordingRequired").checked };
+  return { record_kind: "activity", date: el("date").value, end_date: el("endDate").value, start_time: el("startTime").value, end_time: el("endTime").value, name: el("name").value.trim(), secretary, career: academic ? el("career").value : "", subject: academic ? el("subject").value : "", responsible: el("responsible").value.trim(), classroom, activity_type: el("activityType").value, platform: el("platform").value.trim(), account_used: el("accountUsed").value.trim(), meeting_url: el("meetingUrl").value.trim(), link_is_public: el("publicLink").checked, more_info_url: el("moreInfoUrl").value.trim(), requirements: el("requirements").value.trim(), observations: "", recording_required: el("recordingRequired").checked };
 }
 
 function validateActivity(payload) {
   if (fromISODate(payload.date) > calendarEnd) return "La agenda finaliza el 28 de diciembre de 2026.";
   if (fromISODate(payload.end_date) > calendarEnd) return "La actividad no puede finalizar después del 28 de diciembre de 2026.";
   if (fromISODate(payload.end_date) < fromISODate(payload.date)) return "La fecha de finalización no puede ser anterior a la fecha de inicio.";
-  if (fromISODate(payload.date).getDay() === 0) return "Los domingos no forman parte de esta agenda.";
   if (!payload.secretary) return "Seleccioná quién organiza o completá el campo Otro organizador.";
+  if (payload.more_info_url && !isSafeUrl(payload.more_info_url)) return "El enlace de más información debe comenzar con http:// o https://.";
+  if (isImportantPeriod(payload)) return "";
+  if (fromISODate(payload.date).getDay() === 0) return "Los domingos no forman parte de esta agenda.";
   if (payload.activity_type !== "virtual" && !payload.classroom) return "Seleccioná un aula o completá el campo Otro lugar.";
   if (payload.secretary === academicSecretary && (!payload.career || !payload.subject)) return "Seleccioná la carrera y la materia o Ingreso.";
   if (payload.end_time <= payload.start_time) return "La hora de finalización debe ser posterior a la de inicio.";
   if (payload.meeting_url && !isSafeUrl(payload.meeting_url)) return "El enlace debe comenzar con http:// o https://.";
+  if (payload.link_is_public && !payload.meeting_url) return "Para publicar el enlace, primero completá el enlace de la actividad.";
   if (el("recurrence").value !== "none" && fromISODate(el("repeatUntil").value) < fromISODate(payload.date)) return "La fecha final de repetición no puede ser anterior a la actividad.";
   return "";
 }
 
 function recurrenceRecords(payload) {
+  if (isImportantPeriod(payload)) return [payload];
   const recurrence = el("recurrence").value; if (recurrence === "none") return [payload];
   const step = recurrence === "weekly" ? 7 : 14; const until = fromISODate(el("repeatUntil").value); const seriesId = crypto.randomUUID(); const records = [];
   const durationDays = Math.round((fromISODate(payload.end_date) - fromISODate(payload.date)) / 86400000);
@@ -572,12 +693,12 @@ async function saveActivity(event) {
   if (validationError) { errorBox.textContent = validationError; errorBox.hidden = false; return; }
   const button = el("saveActivity"); button.disabled = true; button.textContent = "Guardando…";
   try {
-    let successMessage = id ? "Actividad actualizada" : "Actividad guardada";
+    let successMessage = isImportantPeriod(payload) ? (id ? "Fecha importante actualizada" : "Fecha importante guardada") : (id ? "Actividad actualizada" : "Actividad guardada");
     if (configured) {
       if (id && el("updateSameName").checked) {
         const updated = await updateActivitiesWithSameName(id, el("originalActivityName").value, el("originalActivityDate").value, payload);
         successMessage = `${updated} ${updated === 1 ? "actividad actualizada" : "actividades actualizadas"}`;
-      } else if (id) await updateDoc(doc(db, activitiesCollection, id), { ...payload, updated_at: serverTimestamp() });
+      } else if (id) await writeActivityUpdate(id, payload);
       else await writeNewActivities(recurrenceRecords(payload));
     } else {
       const records = loadDemoData(); const index = records.findIndex((item) => item.id === id);
@@ -594,7 +715,27 @@ async function saveActivity(event) {
     }
     activityDialog.close(); state.cursor = fromISODate(payload.date); await loadPeriod(); showToast(successMessage);
   } catch (error) { errorBox.textContent = `No se pudo guardar. ${friendlyError(error)}`; errorBox.hidden = false; }
-  finally { button.disabled = false; button.textContent = "Guardar actividad"; }
+  finally { button.disabled = false; button.textContent = el("recordKind").value === "period" ? "Guardar fecha importante" : "Guardar actividad"; }
+}
+
+function publicActivityData(payload) {
+  const { account_used, recording_required, meeting_url, ...publicData } = payload;
+  return { ...publicData, link_is_public: payload.link_is_public === true, meeting_url: payload.link_is_public === true ? meeting_url : "" };
+}
+
+function publicActivityUpdate(payload) {
+  return { ...publicActivityData(payload), account_used: deleteField(), recording_required: deleteField() };
+}
+
+function privateActivityData(payload) {
+  return { account_used: payload.account_used || "", recording_required: payload.recording_required === true, meeting_url: payload.meeting_url || "", updated_at: serverTimestamp() };
+}
+
+async function writeActivityUpdate(id, payload) {
+  const batch = writeBatch(db);
+  batch.update(doc(db, activitiesCollection, id), { ...publicActivityUpdate(payload), updated_at: serverTimestamp() });
+  batch.set(doc(db, privateActivitiesCollection, id), privateActivityData(payload), { merge: true });
+  await batch.commit();
 }
 
 async function updateActivitiesWithSameName(currentId, originalName, originalDate, payload) {
@@ -602,11 +743,12 @@ async function updateActivitiesWithSameName(currentId, originalName, originalDat
   const matching = snapshot.docs.filter((record) => normalizeActivityName(record.data().name) === normalizedName && fromISODate(record.data().date).getDay() === originalDay);
   const targets = matching.some((record) => record.id === currentId) ? matching : [...matching, { id: currentId, ref: doc(db, activitiesCollection, currentId) }];
   const { date, end_date, ...sharedPayload } = payload;
-  for (let start = 0; start < targets.length; start += 450) {
+  for (let start = 0; start < targets.length; start += 225) {
     const batch = writeBatch(db);
-    targets.slice(start, start + 450).forEach((record) => {
+    targets.slice(start, start + 225).forEach((record) => {
       const changes = record.id === currentId ? payload : sharedPayload;
-      batch.update(record.ref, { ...changes, updated_at: serverTimestamp() });
+      batch.update(record.ref, { ...publicActivityUpdate(changes), updated_at: serverTimestamp() });
+      batch.set(doc(db, privateActivitiesCollection, record.id), privateActivityData(changes), { merge: true });
     });
     await batch.commit();
   }
@@ -614,10 +756,13 @@ async function updateActivitiesWithSameName(currentId, originalName, originalDat
 }
 
 async function writeNewActivities(records) {
-  if (records.length === 1) { await addDoc(collection(db, activitiesCollection), { ...records[0], created_at: serverTimestamp(), updated_at: serverTimestamp() }); return; }
-  for (let start = 0; start < records.length; start += 450) {
+  for (let start = 0; start < records.length; start += 225) {
     const batch = writeBatch(db);
-    records.slice(start, start + 450).forEach((record) => { const reference = doc(collection(db, activitiesCollection)); batch.set(reference, { ...record, created_at: serverTimestamp(), updated_at: serverTimestamp() }); });
+    records.slice(start, start + 225).forEach((record) => {
+      const reference = doc(collection(db, activitiesCollection));
+      batch.set(reference, { ...publicActivityData(record), created_at: serverTimestamp(), updated_at: serverTimestamp() });
+      batch.set(doc(db, privateActivitiesCollection, reference.id), { ...privateActivityData(record), created_at: serverTimestamp() });
+    });
     await batch.commit();
   }
 }
@@ -628,9 +773,51 @@ function duplicateActivity(item) {
 async function deleteActivity(item) {
   if (!state.canEdit || !confirm(`¿Eliminar “${item.name}”?`)) return;
   try {
-    if (configured) await deleteDoc(doc(db, activitiesCollection, item.id)); else writeDemoData(loadDemoData().filter((record) => record.id !== item.id));
+    if (configured) {
+      const batch = writeBatch(db);
+      batch.delete(doc(db, activitiesCollection, item.id));
+      batch.delete(doc(db, privateActivitiesCollection, item.id));
+      await batch.commit();
+    } else writeDemoData(loadDemoData().filter((record) => record.id !== item.id));
     if (detailDialog.open) detailDialog.close(); await loadPeriod(); showToast("Actividad eliminada");
   } catch (error) { alert(`No se pudo eliminar. ${friendlyError(error)}`); }
+}
+
+async function migrateLegacyPrivateData() {
+  if (!configured || !state.canEdit) return;
+  const accepted = confirm("Esta acción moverá Cuenta, Grabación y los enlaces existentes al espacio privado. Los enlaces actuales quedarán privados hasta que los marques como públicos al editar cada actividad. ¿Continuar?");
+  if (!accepted) return;
+  const button = el("migratePrivacy"); button.disabled = true; button.textContent = "Protegiendo…";
+  try {
+    const snapshot = await getDocs(collection(db, activitiesCollection));
+    const legacy = snapshot.docs.filter((record) => {
+      const data = record.data();
+      return Object.prototype.hasOwnProperty.call(data, "account_used") || Object.prototype.hasOwnProperty.call(data, "recording_required") || (Object.prototype.hasOwnProperty.call(data, "meeting_url") && !Object.prototype.hasOwnProperty.call(data, "link_is_public"));
+    });
+    for (let start = 0; start < legacy.length; start += 225) {
+      const batch = writeBatch(db);
+      legacy.slice(start, start + 225).forEach((record) => {
+        const data = record.data(); const publicLink = data.link_is_public === true;
+        batch.set(doc(db, privateActivitiesCollection, record.id), {
+          account_used: data.account_used || "",
+          recording_required: data.recording_required === true,
+          meeting_url: data.meeting_url || "",
+          updated_at: serverTimestamp()
+        }, { merge: true });
+        batch.update(record.ref, {
+          account_used: deleteField(),
+          recording_required: deleteField(),
+          link_is_public: publicLink,
+          meeting_url: publicLink ? (data.meeting_url || "") : "",
+          updated_at: serverTimestamp()
+        });
+      });
+      await batch.commit();
+    }
+    await loadPeriod();
+    showToast(legacy.length ? `${legacy.length} actividades protegidas` : "Los datos ya estaban protegidos");
+  } catch (error) { alert(`No se pudo completar la protección. ${friendlyError(error)}`); }
+  finally { button.disabled = false; button.textContent = "Proteger datos anteriores"; }
 }
 
 function openImportForm() { if (!state.canEdit) return; el("importForm").reset(); el("icsFileName").textContent = "Ningún archivo seleccionado"; el("importMessage").hidden = true; importDialog.showModal(); }
@@ -641,7 +828,7 @@ async function importCalendarFile(event) {
   if (!file) { message.textContent = "Seleccioná un archivo .ics."; message.hidden = false; return; }
   const button = el("runImport"); button.disabled = true; button.textContent = "Importando…";
   try {
-    const defaults = { secretary: el("importSecretary").value.trim(), responsible: el("importResponsible").value.trim(), platform: el("importPlatform").value.trim(), account_used: el("importAccount").value.trim(), requirements: el("importRequirements").value.trim(), recording_required: el("importRecording").checked };
+    const defaults = { secretary: el("importSecretary").value.trim(), responsible: el("importResponsible").value.trim(), platform: el("importPlatform").value.trim(), account_used: el("importAccount").value.trim(), requirements: el("importRequirements").value.trim(), recording_required: el("importRecording").checked, link_is_public: false };
     const parsed = parseICS(await file.text(), defaults)
       .filter((item) => fromISODate(item.date) <= calendarEnd && fromISODate(item.date).getDay() !== 0)
       .map((item) => ({ ...item, end_date: activityEndDate(item) > toISODate(calendarEnd) ? toISODate(calendarEnd) : activityEndDate(item) }));
@@ -669,7 +856,7 @@ function parseICS(text, defaults) {
     const description = unescapeICS(values.DESCRIPTION?.value || ""); const location = unescapeICS(values.LOCATION?.value || "") || "Lugar a confirmar"; const summary = unescapeICS(values.SUMMARY.value);
     const url = extractEventUrl(unescapeICS(values.URL?.value || ""), description); const platform = defaults.platform || detectPlatform(`${url} ${description}`); const uid = unescapeICS(values.UID?.value || `${summary}-${values.DTSTART.value}`);
     const importedEndDate = start.allDay && end.allDay ? addDays(end.date, -1) : end.date;
-    const base = { date: toISODate(start.date), end_date: toISODate(importedEndDate < start.date ? start.date : importedEndDate), start_time: start.allDay ? "09:00" : timeFromDate(start.date), end_time: end.allDay ? "10:00" : timeFromDate(end.date), name: summary.slice(0, 160), secretary: defaults.secretary, responsible: defaults.responsible, classroom: location.slice(0, 100), activity_type: "hybrid", requirements: [description, defaults.requirements].filter(Boolean).join(" · ").slice(0, 1000), observations: "", meeting_url: url, platform, account_used: defaults.account_used, recording_required: defaults.recording_required, source_uid: `${uid}-${toISODate(start.date)}` };
+    const base = { record_kind: "activity", date: toISODate(start.date), end_date: toISODate(importedEndDate < start.date ? start.date : importedEndDate), start_time: start.allDay ? "09:00" : timeFromDate(start.date), end_time: end.allDay ? "10:00" : timeFromDate(end.date), name: summary.slice(0, 160), secretary: defaults.secretary, responsible: defaults.responsible, classroom: location.slice(0, 100), activity_type: "hybrid", requirements: [description, defaults.requirements].filter(Boolean).join(" · ").slice(0, 1000), observations: "", meeting_url: url, link_is_public: defaults.link_is_public, more_info_url: "", platform, account_used: defaults.account_used, recording_required: defaults.recording_required, source_uid: `${uid}-${toISODate(start.date)}` };
     result.push(base); expandSimpleRecurrence(base, values.RRULE?.value, start.date, end.date, uid).forEach((item) => result.push(item));
   });
   const unique = new Map(); result.forEach((item) => unique.set(item.source_uid, item)); return [...unique.values()].sort(sortActivities);

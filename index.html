@@ -4,12 +4,12 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#014a7d" />
-    <meta name="description" content="Agenda de hibridaciones y transmisiones de la Facultad de Derecho." />
-    <title>Agenda de Hibridaciones y Transmisiones | Facultad de Derecho</title>
+    <meta name="description" content="Agenda general de actividades de la Facultad de Derecho." />
+    <title>Agenda de Actividades | Facultad de Derecho</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="styles.css?v=18" />
+    <link rel="stylesheet" href="styles.css?v=22" />
   </head>
   <body>
     <header class="site-header">
@@ -17,7 +17,7 @@
         <div class="brand">
           <img src="assets/logo-fd-blanco.png" alt="Facultad de Derecho, Universidad Nacional de Cuyo" />
           <span class="brand-divider" aria-hidden="true"></span>
-          <h1>Agenda de Hibridaciones<br />y Transmisiones</h1>
+          <h1>Agenda de<br />Actividades</h1>
         </div>
         <div class="session-area">
           <span id="sessionLabel" class="session-label">Consulta pública</span>
@@ -49,18 +49,24 @@
           </div>
           <div class="editor-actions editor-only" hidden>
             <button id="importCalendar" class="button button-secondary" type="button" hidden>Importar calendario</button>
+            <button id="migratePrivacy" class="button button-secondary" type="button">Proteger datos anteriores</button>
             <button id="newActivity" class="button button-primary" type="button">+ Cargar actividad</button>
           </div>
         </div>
       </section>
 
-      <div class="type-filters" role="group" aria-label="Filtrar por tipo de actividad">
-        <span class="type-filters-title">Mostrar</span>
-        <label><input id="filterHybrid" data-type-filter type="checkbox" checked /> Híbridas</label>
-        <label><input id="filterVirtual" data-type-filter type="checkbox" checked /> Virtuales</label>
-        <label><input id="filterTransmission" data-type-filter type="checkbox" checked /> Transmisiones</label>
+      <div class="agenda-filters">
+        <div class="type-filters" role="group" aria-label="Filtrar por modalidad">
+          <span class="type-filters-title">Mostrar</span>
+          <label><input id="filterPresential" data-type-filter type="checkbox" checked /> Presenciales</label>
+          <label><input id="filterHybrid" data-type-filter type="checkbox" checked /> Híbridas</label>
+          <label><input id="filterVirtual" data-type-filter type="checkbox" checked /> Virtuales</label>
+          <label><input id="filterTransmission" data-type-filter type="checkbox" checked /> Transmisiones</label>
+        </div>
+        <label class="search-field"><span>Buscar</span><input id="searchActivities" type="search" placeholder="Actividad, responsable, aula…" autocomplete="off" /></label>
       </div>
 
+      <section id="importantPeriods" class="important-periods" aria-label="Fechas importantes" hidden></section>
       <div id="status" class="status" role="status" aria-live="polite">Cargando agenda…</div>
       <section id="agenda" class="agenda" aria-label="Actividades"></section>
     </main>
@@ -75,35 +81,38 @@
         <input id="originalActivityName" type="hidden" />
         <input id="originalActivityDate" type="hidden" />
         <div class="form-grid">
+          <label class="wide">Tipo de carga<select id="recordKind" required><option value="activity">Actividad con fecha y horario</option><option value="period">Período o fecha importante</option></select></label>
           <label>Fecha de inicio<input id="date" type="date" max="2026-12-28" required /></label>
           <label>Fecha de finalización<input id="endDate" type="date" max="2026-12-28" required /></label>
-          <label>Día de inicio<input id="weekdayDisplay" type="text" readonly /></label>
-          <label>Hora de inicio<input id="startTime" type="time" required /></label>
-          <label>Hora de finalización<input id="endTime" type="time" required /></label>
-          <label id="recurrenceField">Repetición
+          <label data-scheduled-only>Día de inicio<input id="weekdayDisplay" type="text" readonly /></label>
+          <label data-scheduled-only>Hora de inicio<input id="startTime" type="time" required /></label>
+          <label data-scheduled-only>Hora de finalización<input id="endTime" type="time" required /></label>
+          <label id="recurrenceField" data-scheduled-only>Repetición
             <select id="recurrence">
               <option value="none">No se repite</option>
               <option value="weekly">Todas las semanas</option>
               <option value="biweekly">Cada 15 días</option>
             </select>
           </label>
-          <label id="repeatUntilField" hidden>Repetir hasta<input id="repeatUntil" type="date" max="2026-12-28" /></label>
-          <label class="wide">Nombre de la actividad<input id="name" type="text" maxlength="160" required /></label>
-          <label>Tipo de actividad<select id="activityType" required><option value="hybrid">Híbrida</option><option value="virtual">Virtual</option><option value="transmission">Transmisión</option></select></label>
+          <label id="repeatUntilField" data-scheduled-only hidden>Repetir hasta<input id="repeatUntil" type="date" max="2026-12-28" /></label>
+          <label class="wide">Título<input id="name" type="text" maxlength="160" required /></label>
+          <label data-scheduled-only>Modalidad<select id="activityType" required><option value="presential">Presencial</option><option value="hybrid">Híbrida</option><option value="virtual">Virtual</option><option value="transmission">Transmisión</option></select></label>
           <label>Organiza<select id="secretary" required></select></label>
           <label id="otherSecretaryField" hidden>Otro organizador<input id="otherSecretary" type="text" maxlength="120" /></label>
-          <label id="careerField" hidden>Carrera<select id="career"></select></label>
-          <label id="subjectField" class="wide" hidden>Materia / Ingreso<select id="subject"></select></label>
-          <label>Responsable<input id="responsible" type="text" maxlength="100" required /></label>
-          <label id="classroomField">Aula/Lugar<select id="classroom" required></select></label>
-          <label id="otherClassroomField" hidden>Otro lugar<input id="otherClassroom" type="text" maxlength="100" /></label>
-          <label>Plataforma<input id="platform" type="text" list="platformOptions" maxlength="80" placeholder="Zoom, Google Meet…" /></label>
+          <label id="careerField" data-scheduled-only hidden>Carrera<select id="career"></select></label>
+          <label id="subjectField" class="wide" data-scheduled-only hidden>Materia / Ingreso<select id="subject"></select></label>
+          <label data-scheduled-only>Responsable<input id="responsible" type="text" maxlength="100" required /></label>
+          <label id="classroomField" data-scheduled-only>Aula/Lugar<select id="classroom" required></select></label>
+          <label id="otherClassroomField" data-scheduled-only hidden>Otro lugar<input id="otherClassroom" type="text" maxlength="100" /></label>
+          <label data-scheduled-only>Plataforma<input id="platform" type="text" list="platformOptions" maxlength="80" placeholder="Zoom, Google Meet…" /></label>
           <datalist id="platformOptions"><option value="Zoom"></option><option value="Google Meet"></option><option value="Microsoft Teams"></option><option value="YouTube"></option></datalist>
-          <label class="wide">Cuenta utilizada<input id="accountUsed" type="text" maxlength="160" /></label>
-          <label class="wide">Enlace de la actividad<input id="meetingUrl" type="url" maxlength="500" placeholder="https://…" /></label>
-          <label class="wide">Requerimientos / observaciones<textarea id="requirements" rows="4" maxlength="1000" placeholder="Micrófonos, cámara, presentación, indicaciones especiales…"></textarea></label>
-          <label class="recording-field"><input id="recordingRequired" type="checkbox" /><span><strong>Requiere grabación</strong><small>Marcar si la actividad debe registrarse.</small></span></label>
-          <label id="bulkEditField" class="recording-field wide" hidden><input id="updateSameName" type="checkbox" /><span><strong>Aplicar estos cambios a las actividades con el mismo nombre y día</strong><small>Solo se actualizarán las que coincidan también en el día de la semana; se conservarán sus fechas.</small></span></label>
+          <label class="wide" data-scheduled-only>Cuenta utilizada<input id="accountUsed" type="text" maxlength="160" /></label>
+          <label class="wide" data-scheduled-only>Enlace de la actividad<input id="meetingUrl" type="url" maxlength="500" placeholder="https://…" /></label>
+          <label class="recording-field wide" data-scheduled-only><input id="publicLink" type="checkbox" /><span><strong>El enlace es público</strong><small>Si no se marca, la consulta pública mostrará “Link privado”. Solo la cuenta editora podrá abrirlo y copiarlo.</small></span></label>
+          <label class="wide">Enlace para más información<input id="moreInfoUrl" type="url" maxlength="500" placeholder="Página, formulario de inscripción, cronograma…" /><small>Este enlace será público.</small></label>
+          <label class="wide"><span id="requirementsLabel">Requerimientos / observaciones</span><textarea id="requirements" rows="4" maxlength="1000" placeholder="Micrófonos, cámara, presentación, indicaciones especiales…"></textarea></label>
+          <label class="recording-field" data-scheduled-only><input id="recordingRequired" type="checkbox" /><span><strong>Requiere grabación</strong><small>Marcar si la actividad debe registrarse.</small></span></label>
+          <label id="bulkEditField" class="recording-field wide" data-scheduled-only hidden><input id="updateSameName" type="checkbox" /><span><strong>Aplicar estos cambios a las actividades con el mismo nombre y día</strong><small>Solo se actualizarán las que coincidan también en el día de la semana; se conservarán sus fechas.</small></span></label>
         </div>
         <div id="formError" class="form-error" role="alert" hidden></div>
         <div class="dialog-actions">
@@ -153,7 +162,7 @@
     <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
 
     <script src="config.js?v=11"></script>
-    <script type="module" src="app.js?v=19"></script>
+    <script type="module" src="app.js?v=22"></script>
     <script>
       window.setTimeout(function () {
         var message = document.getElementById("status");
