@@ -66,15 +66,33 @@ const lawSubjectsWithShifts = new Set([
   "Inglés III",
   "Práctica Profesional Supervisada II"
 ]);
-const academicSubjects = {
-  [lawCareer]: [
-    "Ingreso", "Introducción a la Filosofía", "Problemática del Conocimiento", "Introducción al Derecho", "Derecho Romano", "Historia de las Instituciones Argentinas y Latinoamericanas", "Derecho Político", "Derecho Civil", "Inglés I", "Derecho Penal Parte General I", "Derecho Constitucional", "Principios de la Economía", "Derecho de las Obligaciones I", "Inglés II", "Práctica Profesional Supervisada I", "Derecho Penal Parte General II", "Finanzas Públicas y Derecho Tributario", "Derecho de las Obligaciones II", "Derecho del Consumidor y Defensa de la Competencia", "Inglés III", "Práctica Profesional Supervisada II", "Derecho Penal Parte Especial I", "Derecho Comercial y Societario I", "Contratos Civiles y Comerciales I", "Sociología del Derecho", "Práctica Profesional Supervisada III", "Derecho Penal Parte Especial II", "Derecho Comercial y Societario II", "Contratos Civiles y Comerciales II", "Filosofía del Derecho", "Mediación I", "Práctica Profesional Supervisada IV", "Derechos Reales I", "Títulos Valores", "Derecho del Trabajo y la Seguridad Social", "Derecho Procesal Civil y Comercial. Parte General", "Mediación II", "Práctica Profesional Supervisada V", "Derechos Reales II", "Derecho Procesal Civil y Comercial. Parte Especial", "Derecho Concursal", "Derecho de las Familias", "Derechos Humanos", "Metodología de la Investigación I", "Práctica Profesional Supervisada VI", "Derecho Sucesorio", "Derecho Administrativo I", "Derecho Procesal Penal I", "Derecho Internacional Público y de la Integración", "Mediación III", "Práctica Profesional Supervisada VII", "Derecho Administrativo II", "Derecho Procesal Penal II", "Derecho de los Recursos Naturales, Aguas y Protección del Medio Ambiente", "Derecho Internacional Privado", "Metodología de la Investigación II", "Práctica Profesional Supervisada VIII", "Derecho Público Provincial y Municipal", "Derecho de la Salud y Responsabilidad Médica", "Criminología", "Derecho del Transporte", "Derecho Electoral", "Derecho del Deporte", "Inteligencia Criminal y Crimen Organizado", "Derecho Aeronáutico", "Derecho Aduanero", "Derecho Procesal Constitucional", "Derecho Informático", "Análisis Económico del Derecho", "Derecho Bancario Bursátil y Seguros", "Propiedad Horizontal y Conjuntos Inmobiliarios", "Derecho Penal Económico", "Procedimientos y Procesos Administrativos Especiales", "Empresa Familiar", "Integración Regional", "Derecho de los Negocios Internacionales", "Derecho Notarial y Registral"
-  ],
-  [buildingCareer]: [
-    "Ingreso", "Introducción a la Comunicación", "Ética Profesional", "Inglés I", "Manejo de Utilitarios PC", "Introducciones Contables I", "Fundamentos del Derecho I", "Higiene y Seguridad", "Práctica Profesional I", "Problemática de la Comunicación", "Psicología Social", "Inglés II", "Introducciones Contables II", "Fundamentos del Derecho II", "Estructura Edilicia", "Práctica Profesional II", "Mediación, Negociación y Resolución de Conflictos", "Comercio vinculado a la Administración Edilicia", "Liquidación de Sueldos y Seguridad Social", "Obligaciones, Familia y Sucesiones", "Derechos Reales y Registral", "Propiedad Horizontal", "Comportamiento organizacional", "Práctica Profesional III", "Rendición de Cuentas y Régimen Impositivo", "Ordenamiento territorial, Ingeniería y Arquitectura", "Diseño y Proyectos Inmobiliarios", "Contratos", "Derecho Laboral", "Conjuntos Inmobiliarios", "Práctica Profesional IV", "Proyecto Final"
-  ]
+const academicPlans = {
+  [lawCareer]: {
+    "Primer año": ["Ingreso", "Introducción a la Filosofía", "Problemática del Conocimiento", "Introducción al Derecho", "Derecho Romano", "Historia de las Instituciones Argentinas y Latinoamericanas", "Derecho Político", "Derecho Civil", "Inglés I"],
+    "Segundo año": ["Derecho Penal Parte General I", "Derecho Constitucional", "Principios de la Economía", "Derecho de las Obligaciones I", "Inglés II", "Práctica Profesional Supervisada I", "Derecho Penal Parte General II", "Finanzas Públicas y Derecho Tributario", "Derecho de las Obligaciones II", "Derecho del Consumidor y Defensa de la Competencia", "Inglés III", "Práctica Profesional Supervisada II"],
+    "Tercer año": ["Derecho Penal Parte Especial I", "Derecho Comercial y Societario I", "Contratos Civiles y Comerciales I", "Sociología del Derecho", "Práctica Profesional Supervisada III", "Derecho Penal Parte Especial II", "Derecho Comercial y Societario II", "Contratos Civiles y Comerciales II", "Filosofía del Derecho", "Mediación I", "Práctica Profesional Supervisada IV"],
+    "Cuarto año": ["Derechos Reales I", "Títulos Valores", "Derecho del Trabajo y la Seguridad Social", "Derecho Procesal Civil y Comercial. Parte General", "Mediación II", "Práctica Profesional Supervisada V", "Derechos Reales II", "Derecho Procesal Civil y Comercial. Parte Especial", "Derecho Concursal", "Derecho de las Familias", "Derechos Humanos", "Metodología de la Investigación I", "Práctica Profesional Supervisada VI"],
+    "Quinto año": ["Derecho Sucesorio", "Derecho Administrativo I", "Derecho Procesal Penal I", "Derecho Internacional Público y de la Integración", "Mediación III", "Práctica Profesional Supervisada VII", "Derecho Administrativo II", "Derecho Procesal Penal II", "Derecho de los Recursos Naturales, Aguas; y Protección del Medio Ambiente", "Derecho Internacional Privado", "Metodología de la Investigación II", "Práctica Profesional Supervisada VIII"],
+    "Optativas / otras": ["Derecho Público Provincial y Municipal", "Derecho de la Salud y Responsabilidad Médica", "Criminología", "Derecho del Transporte", "Derecho Electoral", "Derecho del Deporte", "Inteligencia Criminal y Crimen Organizado", "Derecho Aeronáutico", "Derecho Aduanero", "Derecho Procesal Constitucional", "Derecho Informático", "Análisis Económico del Derecho", "Derecho Bancario Bursátil y Seguros", "Propiedad Horizontal y Conjuntos Inmobiliarios", "Derecho Penal Económico", "Procedimientos y Procesos Administrativos Especiales", "Empresa Familiar", "Integración Regional", "Derecho de los Negocios Internacionales", "Derecho Notarial y Registral"]
+  },
+  [buildingCareer]: {
+    "Primer año · 1° semestre": ["Ingreso", "Introducción a la Comunicación", "Ética Profesional", "Inglés I", "Manejo de Utilitarios PC", "Introducciones Contables I", "Fundamentos del Derecho I", "Higiene y Seguridad", "Práctica Profesional I"],
+    "Primer año · 2° semestre": ["Problemática de la Comunicación", "Psicología Social", "Inglés II", "Introducciones Contables II", "Fundamentos del Derecho II", "Estructura Edilicia", "Práctica Profesional II"],
+    "Segundo año · 1° semestre": ["Mediación, Negociación y Resolución de Conflictos", "Comercio vinculado a la Administración Edilicia", "Liquidación de Sueldos y Seguridad Social", "Obligaciones, Familia y Sucesiones", "Derechos Reales y Registral", "Propiedad Horizontal", "Comportamiento organizacional", "Práctica Profesional III"],
+    "Segundo año · 2° semestre": ["Rendición de Cuentas y Régimen Impositivo", "Ordenamiento territorial, Ingeniería y Arquitectura", "Diseño y Proyectos Inmobiliarios", "Contratos", "Derecho Laboral", "Conjuntos Inmobiliarios", "Práctica Profesional IV"],
+    "Proyecto Final": ["Proyecto Final"]
+  }
 };
-academicSubjects[lawCareer] = academicSubjects[lawCareer].flatMap((subject) => lawSubjectsWithShifts.has(subject) ? [`${subject} · TM`, `${subject} · TT`] : [subject]);
+const subjectBaseName = (subject) => String(subject || "").replace(/ · T[MT]$/, "");
+function subjectsForPlan(career, year) {
+  const subjects = academicPlans[career]?.[year] || [];
+  return subjects.flatMap((subject) => lawSubjectsWithShifts.has(subject) ? [`${subject} · TM`, `${subject} · TT`] : [subject]);
+}
+function allSubjectsForCareer(career) { return Object.keys(academicPlans[career] || {}).flatMap((year) => subjectsForPlan(career, year)); }
+function inferAcademicYear(career, subject) {
+  const base = subjectBaseName(subject);
+  return Object.entries(academicPlans[career] || {}).find(([, subjects]) => subjects.includes(base))?.[0] || "";
+}
 
 const state = { view: "day", cursor: new Date(), activities: [], allActivities: [], showAllImportant: false, user: null, canEdit: !configured };
 const el = (id) => document.getElementById(id);
@@ -108,6 +126,21 @@ function normalizedSearch(value) { return String(value || "").normalize("NFD").r
 function matchesSearch(item) {
   const query = normalizedSearch(el("searchActivities").value); if (!query) return true;
   return normalizedSearch([item.name, item.secretary, item.responsible, item.classroom, item.platform, item.career, item.subject, item.requirements, item.observations].filter(Boolean).join(" ")).includes(query);
+}
+function academicTypeKey(item) {
+  const stored = String(item?.academic_activity_type || "").trim().toLocaleLowerCase(locale);
+  if (["class", "exam", "other"].includes(stored)) return stored;
+  return organizerName(item?.secretary) === academicSecretary && item?.subject ? "class" : "";
+}
+function academicTypeLabel(item) { return { class: "Clase de grado", exam: "Examen final", other: "Otra actividad académica" }[academicTypeKey(item)] || ""; }
+function itemAcademicYear(item) { return item?.academic_year || inferAcademicYear(item?.career, item?.subject); }
+function matchesAdvancedFilters(item) {
+  const organizer = el("filterOrganizer").value; const academicType = el("filterAcademicType").value; const career = el("filterCareer").value; const year = el("filterYear").value;
+  if (organizer && organizerName(item.secretary) !== organizer) return false;
+  if (academicType && academicTypeKey(item) !== academicType) return false;
+  if (career && item.career !== career) return false;
+  if (year && itemAcademicYear(item) !== year) return false;
+  return true;
 }
 function minutesFromTime(value) { const [hours, minutes] = cleanTime(value).split(":").map(Number); return Number.isFinite(hours) && Number.isFinite(minutes) ? hours * 60 + minutes : -1; }
 function isInProgress(item, now = new Date()) {
@@ -193,16 +226,24 @@ function bindEvents() {
   el("authButton").addEventListener("click", handleAuthButton);
   el("activityForm").addEventListener("submit", saveActivity);
   el("importForm").addEventListener("submit", importCalendarFile);
-  el("date").addEventListener("change", updateWeekdayInput);
+  el("date").addEventListener("change", updateDateInputs);
   el("endDate").addEventListener("change", updateDateRangeInputs);
   el("recurrence").addEventListener("change", toggleRecurrenceFields);
   el("secretary").addEventListener("change", () => { toggleOtherSecretary(); updateAcademicFields(); });
-  el("career").addEventListener("change", () => updateAcademicFields());
+  el("academicType").addEventListener("change", () => updateAcademicFields());
+  el("career").addEventListener("change", () => updateAcademicYearOptions());
+  el("academicYear").addEventListener("change", () => updateSubjectOptions());
   el("classroom").addEventListener("change", toggleOtherClassroom);
   el("activityType").addEventListener("change", toggleActivityTypeFields);
   el("recordKind").addEventListener("change", toggleRecordKindFields);
   document.querySelectorAll("[data-type-filter]").forEach((input) => input.addEventListener("change", render));
   el("searchActivities").addEventListener("input", render);
+  el("toggleAdvancedFilters").addEventListener("click", toggleAdvancedFilters);
+  el("clearAdvancedFilters").addEventListener("click", clearAdvancedFilters);
+  el("filterOrganizer").addEventListener("change", render);
+  el("filterAcademicType").addEventListener("change", render);
+  el("filterCareer").addEventListener("change", () => { updateFilterYears(); render(); });
+  el("filterYear").addEventListener("change", render);
   el("icsFile").addEventListener("change", () => { el("icsFileName").textContent = el("icsFile").files[0]?.name || "Ningún archivo seleccionado"; });
   document.querySelectorAll("[data-close]").forEach((button) => button.addEventListener("click", () => el(button.dataset.close).close()));
   [importDialog, detailDialog].forEach((dialog) => dialog.addEventListener("click", (event) => { if (event.target === dialog) dialog.close(); }));
@@ -219,20 +260,59 @@ function populateSelect(select, options, placeholder) {
 function populateFormOptions() {
   populateSelect(el("secretary"), [...secretaryOptions, "__other__"], "Seleccionar área organizadora");
   el("secretary").querySelector('option[value="__other__"]').textContent = "Otro (especificar)";
-  populateSelect(el("career"), Object.keys(academicSubjects), "Seleccionar carrera");
-  populateSelect(el("subject"), [], "Primero seleccioná una carrera");
+  populateSelect(el("career"), Object.keys(academicPlans), "Seleccionar carrera");
+  populateSelect(el("academicYear"), [], "Primero seleccioná una carrera");
+  populateSelect(el("subject"), [], "Primero seleccioná un año");
   populateSelect(el("classroom"), [...classroomOptions, "__other__"], "Seleccionar aula o lugar");
   el("classroom").querySelector('option[value="__other__"]').textContent = "Otro (especificar)";
+  populateSelect(el("filterOrganizer"), secretaryOptions, "Todas las áreas");
+  populateSelect(el("filterCareer"), Object.keys(academicPlans), "Todas las carreras");
+  updateFilterYears();
 }
 
-function updateAcademicFields(preferredSubject = "") {
+function updateAcademicFields(preferredSubject = "", preferredYear = "") {
   const academic = el("recordKind").value === "activity" && el("secretary").value === academicSecretary;
-  el("careerField").hidden = !academic; el("subjectField").hidden = !academic;
-  el("career").required = academic; el("subject").required = academic;
-  if (!academic) { el("career").value = ""; populateSelect(el("subject"), [], "Primero seleccioná una carrera"); return; }
-  const subjects = academicSubjects[el("career").value] || [];
-  populateSelect(el("subject"), subjects, subjects.length ? "Seleccionar materia o Ingreso" : "Primero seleccioná una carrera");
+  const detailed = academic && ["class", "exam"].includes(el("academicType").value);
+  el("academicTypeField").hidden = !academic; el("academicType").required = academic;
+  el("careerField").hidden = !detailed; el("academicYearField").hidden = !detailed; el("subjectField").hidden = !detailed;
+  el("career").required = detailed; el("academicYear").required = detailed; el("subject").required = detailed;
+  el("activityType").disabled = academic && el("academicType").value === "exam";
+  if (academic && el("academicType").value === "exam") el("activityType").value = "presential";
+  if (!academic) { el("academicType").value = ""; }
+  if (!detailed) { el("career").value = ""; populateSelect(el("academicYear"), [], "Primero seleccioná una carrera"); populateSelect(el("subject"), [], "Primero seleccioná un año"); toggleActivityTypeFields(); return; }
+  updateAcademicYearOptions(preferredYear, preferredSubject);
+  toggleActivityTypeFields();
+}
+
+function updateAcademicYearOptions(preferredYear = "", preferredSubject = "") {
+  const years = Object.keys(academicPlans[el("career").value] || {});
+  populateSelect(el("academicYear"), years, years.length ? "Seleccionar año o tramo" : "Primero seleccioná una carrera");
+  const inferred = preferredYear || inferAcademicYear(el("career").value, preferredSubject);
+  if (years.includes(inferred)) el("academicYear").value = inferred;
+  updateSubjectOptions(preferredSubject);
+}
+
+function updateSubjectOptions(preferredSubject = "") {
+  const subjects = subjectsForPlan(el("career").value, el("academicYear").value);
+  populateSelect(el("subject"), subjects, subjects.length ? "Seleccionar materia o Ingreso" : "Primero seleccioná un año");
   if (subjects.includes(preferredSubject)) el("subject").value = preferredSubject;
+}
+
+function updateFilterYears() {
+  const career = el("filterCareer").value;
+  const years = career ? Object.keys(academicPlans[career] || {}) : [...new Set(Object.values(academicPlans).flatMap((plan) => Object.keys(plan)))];
+  const selected = el("filterYear").value; populateSelect(el("filterYear"), years, "Todos los años / tramos");
+  if (years.includes(selected)) el("filterYear").value = selected;
+}
+
+function toggleAdvancedFilters() {
+  const panel = el("advancedFilters"); panel.hidden = !panel.hidden;
+  el("toggleAdvancedFilters").setAttribute("aria-expanded", String(!panel.hidden));
+  el("toggleAdvancedFilters").textContent = panel.hidden ? "Ampliar filtros" : "Ocultar filtros";
+}
+
+function clearAdvancedFilters() {
+  el("filterOrganizer").value = ""; el("filterAcademicType").value = ""; el("filterCareer").value = ""; updateFilterYears(); el("filterYear").value = ""; render();
 }
 
 function toggleOtherClassroom() {
@@ -380,14 +460,14 @@ function render() {
   renderImportantPeriods();
   agenda.replaceChildren(); if (state.view === "day") renderDay(); else if (state.view === "week") renderWeek(); else renderMonth();
   const { visibleStart, visibleEnd } = periodRange();
-  const count = state.activities.filter((item) => !isImportantPeriod(item) && overlapsPeriod(item, visibleStart, visibleEnd) && matchesTypeFilter(item) && matchesSearch(item)).length;
+  const count = state.activities.filter((item) => !isImportantPeriod(item) && overlapsPeriod(item, visibleStart, visibleEnd) && matchesTypeFilter(item) && matchesSearch(item) && matchesAdvancedFilters(item)).length;
   status.textContent = `${count} ${count === 1 ? "actividad" : "actividades"}`;
 }
 
 function renderImportantPeriods() {
   const root = el("importantPeriods"); root.replaceChildren();
   const today = toISODate(new Date());
-  const all = state.allActivities.filter((item) => isImportantPeriod(item) && matchesSearch(item)).sort((a, b) => a.date.localeCompare(b.date));
+  const all = state.allActivities.filter((item) => isImportantPeriod(item) && matchesSearch(item) && matchesAdvancedFilters(item)).sort((a, b) => a.date.localeCompare(b.date));
   const current = all.filter((item) => activityEndDate(item) >= today);
   const past = all.filter((item) => activityEndDate(item) < today).sort((a, b) => b.date.localeCompare(a.date));
   const available = state.canEdit && state.showAllImportant ? [...current, ...past] : current.length ? current : state.canEdit ? past.slice(0, 3) : [];
@@ -472,6 +552,7 @@ function createActivityRow(item) {
   const meta = document.createElement("span"); meta.className = "summary-meta";
   const labels = document.createElement("span"); labels.className = "summary-labels";
   const type = document.createElement("span"); type.className = "summary-type"; type.textContent = activityTypeLabel(item); labels.append(type);
+  if (academicTypeLabel(item)) { const academicBadge = document.createElement("span"); academicBadge.className = "academic-type-badge"; academicBadge.textContent = academicTypeLabel(item); labels.append(academicBadge); }
   if (isInProgress(item)) { const live = document.createElement("span"); live.className = "in-progress-badge"; live.textContent = "▶ En curso"; labels.append(live); }
   const placePlatform = document.createElement("span"); placePlatform.className = "summary-place-platform";
   if (!isVirtual(item)) { const room = document.createElement("span"); room.className = "summary-room"; room.textContent = item.classroom || "Lugar a confirmar"; placePlatform.append(room); }
@@ -488,21 +569,24 @@ function createDetailsContent(item, includeEditorActions) {
   const combinedNotes = [item.requirements, item.observations].filter(Boolean).join(" · ");
   const fields = [["Fechas", dateRangeLabel(item)], ["Organiza", organizerName(item.secretary)]];
   if (!isImportantPeriod(item)) {
+    if (academicTypeLabel(item)) fields.push(["Actividad académica", academicTypeLabel(item)]);
     if (item.career) fields.push(["Carrera", item.career]);
+    if (itemAcademicYear(item)) fields.push(["Año / tramo", itemAcademicYear(item)]);
     if (item.subject) fields.push(["Materia / Ingreso", item.subject]);
-    fields.push(["Responsable / contacto", item.responsible]);
+    if (state.canEdit) fields.push(["Responsable / contacto", item.responsible]);
     if (!isVirtual(item)) fields.push(["Aula/Lugar", item.classroom]);
     if (isInProgress(item)) fields.push(["Estado", "▶ En curso"]);
     fields.push(["Modalidad", activityTypeLabel(item)], ["Plataforma", item.platform]);
     if (state.canEdit) fields.push(["Cuenta", item.account_used], ["Grabación", item.recording_required ? "Sí" : "No"]);
   }
-  fields.push(["Requerimientos / observaciones", combinedNotes || "Sin indicaciones"]);
+  if (state.canEdit) fields.push([isImportantPeriod(item) ? "Descripción / información importante" : "Requerimientos / observaciones", combinedNotes || "Sin indicaciones"]);
   fields.forEach(([label, value]) => {
     const block = document.createElement("div"); block.className = "detail-item";
     const labelNode = document.createElement("span"); labelNode.className = "detail-label"; labelNode.textContent = label;
     const valueNode = document.createElement("span"); valueNode.className = "detail-value";
     if (label === "Organiza") { valueNode.classList.add("organizer-value"); valueNode.style.color = organizerColor(item.secretary); }
     if (label === "Modalidad") valueNode.classList.add("activity-type-value");
+    if (label === "Actividad académica") valueNode.classList.add("activity-type-value");
     if (label === "Estado") valueNode.classList.add("activity-type-value");
     if (label === "Plataforma") { const icon = createPlatformIcon(item.platform); if (icon) valueNode.append(icon); }
     if (label === "Grabación" && item.recording_required) { const dot = document.createElement("i"); dot.className = "recording-dot detail-recording-dot"; dot.title = "Requiere grabación"; valueNode.append(dot); }
@@ -544,7 +628,7 @@ function createDetailsContent(item, includeEditorActions) {
 function actionButton(label, handler, className = "") { const button = document.createElement("button"); button.type = "button"; button.textContent = label; button.className = className; button.addEventListener("click", handler); return button; }
 function activitiesForDate(date) {
   const key = toISODate(date);
-  return state.activities.filter((item) => !isImportantPeriod(item) && item.date <= key && activityEndDate(item) >= key && matchesTypeFilter(item) && matchesSearch(item)).sort(sortActivities);
+  return state.activities.filter((item) => !isImportantPeriod(item) && item.date <= key && activityEndDate(item) >= key && matchesTypeFilter(item) && matchesSearch(item) && matchesAdvancedFilters(item)).sort(sortActivities);
 }
 
 function renderMonth() {
@@ -623,8 +707,9 @@ function openActivityForm(item = null) {
   else { el("secretary").value = ""; el("otherSecretary").value = ""; }
   toggleOtherSecretary(); el("responsible").value = item?.responsible || "";
   el("activityType").value = item ? (isTransmission(item) ? "transmission" : isVirtual(item) ? "virtual" : isPresential(item) ? "presential" : "hybrid") : "presential";
-  const inferredCareer = item?.career || Object.keys(academicSubjects).find((career) => academicSubjects[career].includes(item?.subject)) || "";
-  el("career").value = inferredCareer; updateAcademicFields(item?.subject || "");
+  el("academicType").value = item?.academic_activity_type || (storedOrganizer === academicSecretary && item?.subject ? "class" : storedOrganizer === academicSecretary ? "other" : "");
+  const inferredCareer = item?.career || Object.keys(academicPlans).find((career) => allSubjectsForCareer(career).some((subject) => subjectBaseName(subject) === subjectBaseName(item?.subject))) || "";
+  el("career").value = inferredCareer; updateAcademicFields(item?.subject || "", item?.academic_year || inferAcademicYear(inferredCareer, item?.subject));
   const storedClassroom = item?.classroom === "Aula H" ? "Aula H (Magnita)" : item?.classroom || "";
   if (classroomOptions.includes(storedClassroom)) { el("classroom").value = storedClassroom; el("otherClassroom").value = ""; }
   else if (storedClassroom) { el("classroom").value = "__other__"; el("otherClassroom").value = storedClassroom; }
@@ -632,11 +717,10 @@ function openActivityForm(item = null) {
   toggleActivityTypeFields();
   el("platform").value = item?.platform || ""; el("accountUsed").value = item?.account_used || ""; el("meetingUrl").value = item?.meeting_url || ""; el("publicLink").checked = item?.link_is_public === true; el("moreInfoUrl").value = item?.more_info_url || "";
   el("requirements").value = [item?.requirements, item?.observations].filter(Boolean).join(" · "); el("recordingRequired").checked = Boolean(item?.recording_required);
-  updateWeekdayInput(); toggleRecordKindFields(); activityDialog.showModal();
+  updateDateInputs(); toggleRecordKindFields(); activityDialog.showModal();
 }
 
-function updateWeekdayInput() {
-  el("weekdayDisplay").value = el("date").value ? weekday(fromISODate(el("date").value)) : "";
+function updateDateInputs() {
   if (!el("endDate").value || el("endDate").value < el("date").value) el("endDate").value = el("date").value;
   el("endDate").min = el("date").value;
   if (el("recurrence").value !== "none" && el("repeatUntil").value < el("date").value) el("repeatUntil").value = el("date").value;
@@ -648,14 +732,14 @@ function updateDateRangeInputs() {
 function toggleRecurrenceFields() { const repeats = el("recordKind").value === "activity" && el("recurrence").value !== "none"; el("repeatUntilField").hidden = !repeats; el("repeatUntil").required = repeats; }
 
 function activityPayload() {
-  const academic = el("secretary").value === academicSecretary;
+  const academic = el("secretary").value === academicSecretary; const detailedAcademic = academic && ["class", "exam"].includes(el("academicType").value);
   const secretary = el("secretary").value === "__other__" ? el("otherSecretary").value.trim() : el("secretary").value;
   const recordKind = el("recordKind").value;
   if (recordKind === "period") {
-    return { record_kind: "period", date: el("date").value, end_date: el("endDate").value, start_time: "", end_time: "", name: el("name").value.trim(), secretary, career: "", subject: "", responsible: "", classroom: "", activity_type: "", platform: "", account_used: "", meeting_url: "", link_is_public: false, more_info_url: el("moreInfoUrl").value.trim(), requirements: el("requirements").value.trim(), observations: "", recording_required: false };
+    return { record_kind: "period", date: el("date").value, end_date: el("endDate").value, start_time: "", end_time: "", name: el("name").value.trim(), secretary, academic_activity_type: "", career: "", academic_year: "", subject: "", responsible: "", classroom: "", activity_type: "", platform: "", account_used: "", meeting_url: "", link_is_public: false, more_info_url: el("moreInfoUrl").value.trim(), requirements: el("requirements").value.trim(), observations: "", recording_required: false };
   }
   const classroom = el("activityType").value === "virtual" ? "" : el("classroom").value === "__other__" ? el("otherClassroom").value.trim() : el("classroom").value;
-  return { record_kind: "activity", date: el("date").value, end_date: el("endDate").value, start_time: el("startTime").value, end_time: el("endTime").value, name: el("name").value.trim(), secretary, career: academic ? el("career").value : "", subject: academic ? el("subject").value : "", responsible: el("responsible").value.trim(), classroom, activity_type: el("activityType").value, platform: el("platform").value.trim(), account_used: el("accountUsed").value.trim(), meeting_url: el("meetingUrl").value.trim(), link_is_public: el("publicLink").checked, more_info_url: el("moreInfoUrl").value.trim(), requirements: el("requirements").value.trim(), observations: "", recording_required: el("recordingRequired").checked };
+  return { record_kind: "activity", date: el("date").value, end_date: el("endDate").value, start_time: el("startTime").value, end_time: el("endTime").value, name: el("name").value.trim(), secretary, academic_activity_type: academic ? el("academicType").value : "", career: detailedAcademic ? el("career").value : "", academic_year: detailedAcademic ? el("academicYear").value : "", subject: detailedAcademic ? el("subject").value : "", responsible: el("responsible").value.trim(), classroom, activity_type: el("academicType").value === "exam" ? "presential" : el("activityType").value, platform: el("platform").value.trim(), account_used: el("accountUsed").value.trim(), meeting_url: el("meetingUrl").value.trim(), link_is_public: el("publicLink").checked, more_info_url: el("moreInfoUrl").value.trim(), requirements: el("requirements").value.trim(), observations: "", recording_required: el("recordingRequired").checked };
 }
 
 function validateActivity(payload) {
@@ -667,7 +751,8 @@ function validateActivity(payload) {
   if (isImportantPeriod(payload)) return "";
   if (fromISODate(payload.date).getDay() === 0) return "Los domingos no forman parte de esta agenda.";
   if (payload.activity_type !== "virtual" && !payload.classroom) return "Seleccioná un aula o completá el campo Otro lugar.";
-  if (payload.secretary === academicSecretary && (!payload.career || !payload.subject)) return "Seleccioná la carrera y la materia o Ingreso.";
+  if (payload.secretary === academicSecretary && !payload.academic_activity_type) return "Seleccioná el tipo de actividad académica.";
+  if (["class", "exam"].includes(payload.academic_activity_type) && (!payload.career || !payload.academic_year || !payload.subject)) return "Seleccioná la carrera, el año o tramo y la materia o Ingreso.";
   if (payload.end_time <= payload.start_time) return "La hora de finalización debe ser posterior a la de inicio.";
   if (payload.meeting_url && !isSafeUrl(payload.meeting_url)) return "El enlace debe comenzar con http:// o https://.";
   if (payload.link_is_public && !payload.meeting_url) return "Para publicar el enlace, primero completá el enlace de la actividad.";
@@ -719,16 +804,16 @@ async function saveActivity(event) {
 }
 
 function publicActivityData(payload) {
-  const { account_used, recording_required, meeting_url, ...publicData } = payload;
+  const { account_used, recording_required, meeting_url, responsible, requirements, observations, ...publicData } = payload;
   return { ...publicData, link_is_public: payload.link_is_public === true, meeting_url: payload.link_is_public === true ? meeting_url : "" };
 }
 
 function publicActivityUpdate(payload) {
-  return { ...publicActivityData(payload), account_used: deleteField(), recording_required: deleteField() };
+  return { ...publicActivityData(payload), account_used: deleteField(), recording_required: deleteField(), responsible: deleteField(), requirements: deleteField(), observations: deleteField() };
 }
 
 function privateActivityData(payload) {
-  return { account_used: payload.account_used || "", recording_required: payload.recording_required === true, meeting_url: payload.meeting_url || "", updated_at: serverTimestamp() };
+  return { account_used: payload.account_used || "", recording_required: payload.recording_required === true, meeting_url: payload.meeting_url || "", responsible: payload.responsible || "", requirements: payload.requirements || "", observations: payload.observations || "", updated_at: serverTimestamp() };
 }
 
 async function writeActivityUpdate(id, payload) {
@@ -785,28 +870,36 @@ async function deleteActivity(item) {
 
 async function migrateLegacyPrivateData() {
   if (!configured || !state.canEdit) return;
-  const accepted = confirm("Esta acción moverá Cuenta, Grabación y los enlaces existentes al espacio privado. Los enlaces actuales quedarán privados hasta que los marques como públicos al editar cada actividad. ¿Continuar?");
+  const accepted = confirm("Esta acción protegerá Cuenta, Grabación, Responsable, Requerimientos y los enlaces privados de las actividades existentes. No se perderán los datos que ya fueron protegidos. ¿Continuar?");
   if (!accepted) return;
   const button = el("migratePrivacy"); button.disabled = true; button.textContent = "Protegiendo…";
   try {
     const snapshot = await getDocs(collection(db, activitiesCollection));
+    const privateSnapshot = await getDocs(collection(db, privateActivitiesCollection));
+    const privateById = new Map(privateSnapshot.docs.map((record) => [record.id, record.data()]));
     const legacy = snapshot.docs.filter((record) => {
       const data = record.data();
-      return Object.prototype.hasOwnProperty.call(data, "account_used") || Object.prototype.hasOwnProperty.call(data, "recording_required") || (Object.prototype.hasOwnProperty.call(data, "meeting_url") && !Object.prototype.hasOwnProperty.call(data, "link_is_public"));
+      return ["account_used", "recording_required", "responsible", "requirements", "observations"].some((field) => Object.prototype.hasOwnProperty.call(data, field)) || (Object.prototype.hasOwnProperty.call(data, "meeting_url") && !Object.prototype.hasOwnProperty.call(data, "link_is_public"));
     });
     for (let start = 0; start < legacy.length; start += 225) {
       const batch = writeBatch(db);
       legacy.slice(start, start + 225).forEach((record) => {
-        const data = record.data(); const publicLink = data.link_is_public === true;
+        const data = record.data(); const stored = privateById.get(record.id) || {}; const publicLink = data.link_is_public === true;
         batch.set(doc(db, privateActivitiesCollection, record.id), {
-          account_used: data.account_used || "",
-          recording_required: data.recording_required === true,
-          meeting_url: data.meeting_url || "",
+          account_used: data.account_used ?? stored.account_used ?? "",
+          recording_required: data.recording_required ?? stored.recording_required ?? false,
+          meeting_url: data.meeting_url || stored.meeting_url || "",
+          responsible: data.responsible ?? stored.responsible ?? "",
+          requirements: data.requirements ?? stored.requirements ?? "",
+          observations: data.observations ?? stored.observations ?? "",
           updated_at: serverTimestamp()
         }, { merge: true });
         batch.update(record.ref, {
           account_used: deleteField(),
           recording_required: deleteField(),
+          responsible: deleteField(),
+          requirements: deleteField(),
+          observations: deleteField(),
           link_is_public: publicLink,
           meeting_url: publicLink ? (data.meeting_url || "") : "",
           updated_at: serverTimestamp()

@@ -9,7 +9,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="styles.css?v=22" />
+    <link rel="stylesheet" href="styles.css?v=23" />
   </head>
   <body>
     <header class="site-header">
@@ -63,7 +63,17 @@
           <label><input id="filterVirtual" data-type-filter type="checkbox" checked /> Virtuales</label>
           <label><input id="filterTransmission" data-type-filter type="checkbox" checked /> Transmisiones</label>
         </div>
-        <label class="search-field"><span>Buscar</span><input id="searchActivities" type="search" placeholder="Actividad, responsable, aula…" autocomplete="off" /></label>
+        <div class="filter-tools">
+          <label class="search-field"><span>Buscar</span><input id="searchActivities" type="search" placeholder="Actividad, aula, materia…" autocomplete="off" /></label>
+          <button id="toggleAdvancedFilters" class="button button-secondary filter-toggle" type="button" aria-expanded="false">Ampliar filtros</button>
+        </div>
+      </div>
+      <div id="advancedFilters" class="advanced-filters" hidden>
+        <label>Área organizadora<select id="filterOrganizer"></select></label>
+        <label>Actividad académica<select id="filterAcademicType"><option value="">Todas</option><option value="class">Clases de grado</option><option value="exam">Exámenes</option></select></label>
+        <label>Carrera<select id="filterCareer"></select></label>
+        <label>Año / tramo<select id="filterYear"></select></label>
+        <button id="clearAdvancedFilters" class="button button-secondary" type="button">Limpiar filtros</button>
       </div>
 
       <section id="importantPeriods" class="important-periods" aria-label="Fechas importantes" hidden></section>
@@ -82,9 +92,9 @@
         <input id="originalActivityDate" type="hidden" />
         <div class="form-grid">
           <label class="wide">Tipo de carga<select id="recordKind" required><option value="activity">Actividad con fecha y horario</option><option value="period">Período o fecha importante</option></select></label>
+          <label class="wide">Título<input id="name" type="text" maxlength="160" required /></label>
           <label>Fecha de inicio<input id="date" type="date" max="2026-12-28" required /></label>
           <label>Fecha de finalización<input id="endDate" type="date" max="2026-12-28" required /></label>
-          <label data-scheduled-only>Día de inicio<input id="weekdayDisplay" type="text" readonly /></label>
           <label data-scheduled-only>Hora de inicio<input id="startTime" type="time" required /></label>
           <label data-scheduled-only>Hora de finalización<input id="endTime" type="time" required /></label>
           <label id="recurrenceField" data-scheduled-only>Repetición
@@ -95,11 +105,12 @@
             </select>
           </label>
           <label id="repeatUntilField" data-scheduled-only hidden>Repetir hasta<input id="repeatUntil" type="date" max="2026-12-28" /></label>
-          <label class="wide">Título<input id="name" type="text" maxlength="160" required /></label>
           <label data-scheduled-only>Modalidad<select id="activityType" required><option value="presential">Presencial</option><option value="hybrid">Híbrida</option><option value="virtual">Virtual</option><option value="transmission">Transmisión</option></select></label>
           <label>Organiza<select id="secretary" required></select></label>
           <label id="otherSecretaryField" hidden>Otro organizador<input id="otherSecretary" type="text" maxlength="120" /></label>
+          <label id="academicTypeField" data-scheduled-only hidden>Actividad académica<select id="academicType"><option value="">Seleccionar</option><option value="class">Clase de grado</option><option value="exam">Examen final</option><option value="other">Otra actividad académica</option></select></label>
           <label id="careerField" data-scheduled-only hidden>Carrera<select id="career"></select></label>
+          <label id="academicYearField" data-scheduled-only hidden>Año / tramo<select id="academicYear"></select></label>
           <label id="subjectField" class="wide" data-scheduled-only hidden>Materia / Ingreso<select id="subject"></select></label>
           <label data-scheduled-only>Responsable<input id="responsible" type="text" maxlength="100" required /></label>
           <label id="classroomField" data-scheduled-only>Aula/Lugar<select id="classroom" required></select></label>
@@ -162,7 +173,7 @@
     <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
 
     <script src="config.js?v=11"></script>
-    <script type="module" src="app.js?v=22"></script>
+    <script type="module" src="app.js?v=23"></script>
     <script>
       window.setTimeout(function () {
         var message = document.getElementById("status");

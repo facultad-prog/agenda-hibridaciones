@@ -24,7 +24,8 @@ El proyecto ya contiene la configuración del proyecto Firebase `agenda-hibridac
 - El nombre del área organizadora aparece con su color institucional al desplegar una actividad.
 - Modalidad seleccionable entre Presencial, Híbrida, Virtual y Transmisión. Las cuatro modalidades muestran un rótulo pequeño en azul `#023764`, ubicado sobre Aula/Lugar y la plataforma; las virtuales no solicitan ni muestran Aula/Lugar.
 - Filtro mediante casillas para mostrar u ocultar actividades presenciales, híbridas, virtuales y transmisiones.
-- Buscador por nombre de actividad, área organizadora, responsable, aula, plataforma, carrera, materia y observaciones.
+- Panel ampliable para filtrar por área organizadora y, dentro de Académica, por clases de grado, exámenes, carrera y año o tramo.
+- Buscador por nombre de actividad, área organizadora, aula, plataforma, carrera y materia. Al iniciar sesión, también busca en los datos privados.
 - Rótulo automático **▶ En curso** durante el horario de desarrollo de una actividad.
 - Tarjetas identificadas mediante una franja con el color correspondiente al área organizadora.
 - Campo público y opcional **Enlace para más información** en todas las actividades.
@@ -37,12 +38,13 @@ El proyecto ya contiene la configuración del proyecto Firebase `agenda-hibridac
 - Edición individual o conjunta de las actividades que tengan el mismo nombre y el mismo día de la semana.
 - Listas desplegables institucionales para área organizadora y aula, con opción de indicar otro lugar.
 - El formulario de edición solo se cierra mediante los botones Cerrar o Cancelar, para evitar cierres accidentales.
-- Para Secretaría Académica: selección dependiente de carrera y materia, con la opción Ingreso disponible en ambas carreras.
+- Para Secretaría Académica: selección de Clase de grado, Examen final u Otra actividad académica. Las clases y exámenes habilitan selecciones dependientes de carrera, año o tramo y materia.
+- Los exámenes finales quedan fijados automáticamente como presenciales.
 - En Abogacía, las materias de los primeros trayectos que se dictan en ambos turnos aparecen diferenciadas como `TM` (turno mañana) y `TT` (turno tarde).
 - Rango de fechas para actividades que duran varios días; se muestran cada día del período, excepto los domingos.
 - Actividades únicas, semanales o cada 15 días.
 - Importación inicial desde Google Calendar mediante `.ics`.
-- Los datos **Cuenta** y **Grabación**, y los enlaces privados, se guardan en una colección protegida y solo son visibles para la cuenta editora.
+- Los datos **Responsable/contacto**, **Requerimientos/observaciones**, **Cuenta**, **Grabación** y los enlaces privados se guardan en una colección protegida y solo son visibles para la cuenta editora.
 - Tipografía Montserrat, color `#014a7d` y logo institucional.
 
 ## Estructura
@@ -94,7 +96,7 @@ Este paso habilita el botón **Administrar agenda** en el sitio publicado.
 5. En **Tipo de carga**, elegir **Actividad con fecha y horario**.
 6. Completar fecha de inicio, fecha de finalización, horario, actividad, modalidad, área organizadora, responsable, aula, plataforma, cuenta, enlace, grabación y observaciones. Si dura un solo día, colocar la misma fecha en ambos campos.
 7. Marcar **El enlace es público** solamente cuando cualquier persona que consulta la agenda pueda abrirlo. Si queda desmarcado, el enlace se guarda de forma privada.
-8. Si se elige **Secretaría Académica**, seleccionar también la carrera y la materia. Si el lugar no figura en la lista, elegir **Otro (especificar)**.
+8. Si se elige **Secretaría Académica**, seleccionar el tipo académico. Para clases de grado y exámenes finales, completar también carrera, año o tramo y materia. Si el lugar no figura, elegir **Otro (especificar)**.
 9. En **Repetición**, elegir **No se repite**, **Todas las semanas** o **Cada 15 días**. Para una repetición, indicar hasta qué fecha debe generarse.
 10. Presionar **Guardar actividad**.
 
@@ -158,8 +160,8 @@ Esta modalidad muestra tres actividades de ejemplo y permite probar carga, repet
 4. Ingresar a la agenda con la cuenta editora.
 5. Presionar una sola vez **Proteger datos anteriores** y confirmar.
 
-La migración mueve **Cuenta**, **Grabación** y los enlaces existentes a `actividades_privadas`. Por seguridad, todos los enlaces anteriores quedan privados; para publicar uno, editar la actividad y marcar **El enlace es público**.
+La migración mueve **Responsable/contacto**, **Requerimientos/observaciones**, **Cuenta**, **Grabación** y los enlaces privados existentes a `actividades_privadas`. Conserva los datos que ya habían sido protegidos. Para publicar un enlace, editar la actividad y marcar **El enlace es público**.
 
 ## Seguridad
 
-La copia exacta de las reglas está en `firebase/firestore.rules`. La colección `actividades` conserva únicamente la información pública. `actividades_privadas` solo admite lectura y escritura cuando Firebase verifica el correo `facultad@derecho.uncu.edu.ar`. Las reglas también impiden que Cuenta o Grabación se guarden accidentalmente en un documento público.
+La copia exacta de las reglas está en `firebase/firestore.rules`. La colección `actividades` conserva únicamente la información pública. `actividades_privadas` solo admite lectura y escritura cuando Firebase verifica el correo `facultad@derecho.uncu.edu.ar`. Las reglas impiden que Responsable, Requerimientos, Cuenta o Grabación se guarden accidentalmente en un documento público.

@@ -9,7 +9,7 @@ service cloud.firestore {
     }
 
     function publicActivityIsSafe() {
-      return !request.resource.data.keys().hasAny(["account_used", "recording_required"])
+      return !request.resource.data.keys().hasAny(["account_used", "recording_required", "responsible", "requirements", "observations"])
         && (
           !request.resource.data.keys().hasAny(["meeting_url"])
           || request.resource.data.meeting_url == ""
